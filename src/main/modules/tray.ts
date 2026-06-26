@@ -32,6 +32,11 @@ let songTitleTray: Tray | null = null;
 
 let isPlaying = false;
 let currentSong: SongInfo | null = null;
+// 当前菜单栏歌词行（macOS）。为空时回退显示歌名
+let currentLyric: string | null = null;
+
+// 菜单栏歌词最大显示长度，过长截断防止挤占其它菜单栏图标
+const STATUS_BAR_LYRIC_MAX_LENGTH = 28;
 
 // 使用自动导入的语言选项
 const LANGUAGES = getLanguageOptions();
@@ -68,12 +73,43 @@ function getTruncatedSongTitle(song: SongInfo | null, maxLength: number = 14): s
 
 // 更新当前播放的音乐信息
 export function updateCurrentSong(song: SongInfo | null) {
+  const isSameSong = currentSong?.song?.id === song?.song?.id;
   currentSong = song;
+  // 切歌时清空上一首残留的歌词行，避免菜单栏短暂显示错位歌词
+  if (!isSameSong) {
+    currentLyric = null;
+  }
   if (tray) {
     updateTrayMenu(BrowserWindow.getAllWindows()[0]);
   }
   // 更新状态栏歌曲信息
   updateStatusBarTray();
+}
+
+// 更新菜单栏歌词行（macOS），由渲染进程随播放进度推送
+export function updateTrayLyric(content: string | null) {
+  if (process.platform !== 'darwin') return;
+  const text = (content || '').trim();
+  currentLyric = text || null;
+  updateStatusBarTray();
+}
+
+// 计算菜单栏标题文本：优先显示当前歌词行，无歌词时回退显示歌名
+function getStatusBarText(): string {
+  if (currentLyric) {
+    return currentLyric.length > STATUS_BAR_LYRIC_MAX_LENGTH
+      ? `${currentLyric.slice(0, STATUS_BAR_LYRIC_MAX_LENGTH)}…`
+      : currentLyric;
+  }
+
+  if (!currentSong) return '未播放';
+
+  const songName = currentSong.name.slice(0, 10);
+  const artistStr = getArtistString(currentSong);
+  if (artistStr) {
+    return `${songName} - ${artistStr.slice(0, 6)}${artistStr.length > 6 ? '..' : ''}`;
+  }
+  return songName;
 }
 
 // 确保 macOS 状态栏图标能正确显示
@@ -90,34 +126,15 @@ function updateStatusBarTray() {
 
   const iconSize = getProperIconSize();
 
-  // 更新歌曲标题显示
+  // 更新菜单栏文本：优先当前歌词行，无歌词时回退歌名
   if (songTitleTray) {
-    if (currentSong) {
-      // 限制歌曲名显示长度，添加作者名
-      const songName = currentSong.name.slice(0, 10);
-      let title = songName;
-      const artistStr = getArtistString(currentSong);
-      // 如果有艺术家名称，添加到标题中
-      if (artistStr) {
-        title = `${songName} - ${artistStr.slice(0, 6)}${artistStr.length > 6 ? '..' : ''}`;
-      }
-
-      // 设置标题和提示
-      songTitleTray.setTitle(title, {
-        fontType: 'monospacedDigit' // 使用等宽字体以确保更好的可读性
-      });
-
-      // 完整信息放在tooltip中
-      const fullTitle = getSongTitle(currentSong);
-      songTitleTray.setToolTip(fullTitle);
-      console.log('更新状态栏歌曲显示:', title, '完整信息:', fullTitle);
-    } else {
-      songTitleTray.setTitle('未播放', {
-        fontType: 'monospacedDigit'
-      });
-      songTitleTray.setToolTip('未播放');
-      console.log('更新状态栏歌曲显示: 未播放');
-    }
+    const title = getStatusBarText();
+    songTitleTray.setTitle(title, {
+      fontType: 'monospacedDigit' // 使用等宽字体以确保更好的可读性
+    });
+    // tooltip 始终展示完整歌曲信息，便于识别正在播放的曲目
+    const fullTitle = currentSong ? getSongTitle(currentSong) : '未播放';
+    songTitleTray.setToolTip(fullTitle);
   }
 
   // 更新播放/暂停图标
@@ -373,15 +390,11 @@ function initializeStatusBarTray(mainWindow: BrowserWindow) {
     mainWindow.webContents.send('global-shortcut', 'prevPlay');
   });
 
-  // 创建歌曲信息显示 - 需要使用特殊处理
-  const titleIcon = nativeImage
-    .createFromPath(join(app.getAppPath(), 'resources/icons', 'note.png'))
-    .resize({ width: 16, height: 16 });
-  titleIcon.setTemplateImage(true);
-  songTitleTray = new Tray(titleIcon);
+  // 歌词/歌名显示项：纯文本，不带图标（音符图标由主托盘承载，避免重复）
+  songTitleTray = new Tray(nativeImage.createEmpty());
 
   // 初始化显示文本
-  const initialText = getSongTitle(currentSong);
+  const initialText = getStatusBarText();
 
   // 在macOS上，特别设置title来显示文本，确保它能正确显示
   songTitleTray.setTitle(initialText, {
@@ -404,13 +417,22 @@ function initializeStatusBarTray(mainWindow: BrowserWindow) {
  * 初始化系统托盘
  */
 export function initializeTray(iconPath: string, mainWindow: BrowserWindow) {
-  // 根据平台选择合适的图标
-  const iconSize = process.platform === 'darwin' ? 18 : 16;
-  const iconFile = process.platform === 'darwin' ? 'icon_16x16.png' : 'icon_16x16.png';
+  const isMac = process.platform === 'darwin';
+  const iconSize = isMac ? 18 : 16;
 
-  const trayIcon = nativeImage
-    .createFromPath(join(iconPath, iconFile))
-    .resize({ width: iconSize, height: iconSize });
+  let trayIcon: Electron.NativeImage;
+  if (isMac) {
+    // macOS 菜单栏使用单色音符模板图标，与播放控制图标保持同一视觉风格
+    trayIcon = nativeImage
+      .createFromPath(join(app.getAppPath(), 'resources/icons', 'note.png'))
+      .resize({ width: iconSize, height: iconSize });
+    trayIcon.setTemplateImage(true);
+  } else {
+    // Windows / Linux 使用彩色应用图标
+    trayIcon = nativeImage
+      .createFromPath(join(iconPath, 'icon_16x16.png'))
+      .resize({ width: iconSize, height: iconSize });
+  }
 
   tray = new Tray(trayIcon);
 

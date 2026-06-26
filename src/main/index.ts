@@ -17,7 +17,13 @@ import { initializeMpris, updateMprisCurrentSong, updateMprisPlayState } from '.
 import { initializeOtherApi } from './modules/otherApi';
 import { initializeRemoteControl } from './modules/remoteControl';
 import { initializeShortcuts } from './modules/shortcuts';
-import { initializeTray, updateCurrentSong, updatePlayState, updateTrayMenu } from './modules/tray';
+import {
+  initializeTray,
+  updateCurrentSong,
+  updatePlayState,
+  updateTrayLyric,
+  updateTrayMenu
+} from './modules/tray';
 import { setupUpdateHandlers } from './modules/update';
 import { createMainWindow, initializeWindowManager, setAppQuitting } from './modules/window';
 import { initWindowSizeManager } from './modules/window-size';
@@ -188,6 +194,19 @@ if (!isSingleInstance) {
     updateCurrentSong(song);
     updateMprisCurrentSong(song);
   });
+
+  // 监听菜单栏歌词更新（macOS）。渲染进程发送 { content, time, sender } 的 JSON 字符串
+  // 注意：Linux 由 mpris 模块单独消费同一事件用于 D-Bus 桌面歌词
+  if (process.platform === 'darwin') {
+    ipcMain.on('tray-lyric-update', (_, lrcObj: string) => {
+      try {
+        const { content } = JSON.parse(lrcObj);
+        updateTrayLyric(typeof content === 'string' ? content : null);
+      } catch (error) {
+        console.error('[Tray] 解析菜单栏歌词失败:', error);
+      }
+    });
+  }
 
   // 所有窗口关闭时的处理
   app.on('window-all-closed', () => {

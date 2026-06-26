@@ -4,7 +4,9 @@
     class="flex justify-between px-6 py-2 select-none relative text-dark dark:text-white"
     @mousedown="drag"
   >
-    <div id="title">Alger Music</div>
+    <!-- macOS 使用原生交通灯按钮，隐藏自绘标题文字让位 -->
+    <div v-if="!isMac" id="title">Alger Music</div>
+    <div v-else></div>
     <div id="buttons" class="flex gap-4">
       <n-button
         v-if="!isElectron"
@@ -18,15 +20,19 @@
         下载桌面版
       </n-button>
       <template v-if="isElectron">
+        <!-- 画中画（迷你模式）为应用特有功能，原生交通灯无对应，各平台均保留 -->
         <div class="text-gray-600 dark:text-gray-400 hover:text-green-500" @click="miniWindow">
           <i class="iconfont ri-picture-in-picture-line"></i>
         </div>
-        <div class="text-gray-600 dark:text-gray-400 hover:text-green-500" @click="minimize">
-          <i class="iconfont icon-minisize"></i>
-        </div>
-        <div class="text-gray-600 dark:text-gray-400 hover:text-green-500" @click="handleClose">
-          <i class="iconfont icon-close"></i>
-        </div>
+        <!-- 最小化 / 关闭：macOS 交由原生交通灯接管，仅非 macOS 显示自绘按钮 -->
+        <template v-if="!isMac">
+          <div class="text-gray-600 dark:text-gray-400 hover:text-green-500" @click="minimize">
+            <i class="iconfont icon-minisize"></i>
+          </div>
+          <div class="text-gray-600 dark:text-gray-400 hover:text-green-500" @click="handleClose">
+            <i class="iconfont icon-close"></i>
+          </div>
+        </template>
       </template>
     </div>
   </div>
@@ -126,6 +132,9 @@ import { useSettingsStore } from '@/store/modules/settings';
 import { isElectron } from '@/utils';
 
 const { t } = useI18n();
+
+// macOS 使用原生交通灯按钮，隐藏自绘的最小化/关闭按钮与标题文字
+const isMac = isElectron && window.electron.ipcRenderer.sendSync('get-platform') === 'darwin';
 
 const settingsStore = useSettingsStore();
 const showCloseModal = ref(false);

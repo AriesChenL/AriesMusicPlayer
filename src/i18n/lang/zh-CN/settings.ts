@@ -89,7 +89,7 @@ export default {
     testAudio: '测试',
     selectAudioDevice: '选择输出设备',
     showStatusBar: '是否显示状态栏控制功能',
-    showStatusBarContent: '可以在您的mac状态栏显示音乐控制功能(重启后生效)',
+    showStatusBarContent: '在 mac 顶部菜单栏显示播放控制与滚动歌词(重启后生效)',
 
     fallbackParser: 'GD音乐台(music.gdstudio.xyz)设置',
     fallbackParserDesc:

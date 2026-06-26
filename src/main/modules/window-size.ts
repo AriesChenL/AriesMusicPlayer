@@ -281,13 +281,21 @@ class WindowSizeManager {
     const savedState = this.getWindowState();
 
     // 准备选项
+    const isMac = process.platform === 'darwin';
     const options: Electron.BrowserWindowConstructorOptions = {
       width: savedState?.width || DEFAULT_MAIN_WIDTH,
       height: savedState?.height || DEFAULT_MAIN_HEIGHT,
       minWidth: MIN_WIDTH,
       minHeight: MIN_HEIGHT,
       show: false,
-      frame: false,
+      // macOS 使用原生交通灯按钮（隐藏标题栏但保留红黄绿控制），并将其垂直居中到自定义标题栏
+      // Windows / Linux 仍使用完全无边框 + 自绘控制按钮
+      ...(isMac
+        ? {
+            titleBarStyle: 'hidden' as const,
+            trafficLightPosition: { x: 14, y: 14 }
+          }
+        : { frame: false }),
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true

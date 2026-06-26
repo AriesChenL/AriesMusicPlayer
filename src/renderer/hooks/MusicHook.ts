@@ -806,8 +806,9 @@ export const sendLyricToWin = () => {
 };
 
 // 发送歌词到系统托盘歌词（TrayLyric）
+// Linux: 用于 D-Bus 桌面歌词；macOS: 用于顶部菜单栏滚动歌词
 const sendTrayLyric = (index: number) => {
-  if (!isElectron || cachedPlatform !== 'linux') return;
+  if (!isElectron || (cachedPlatform !== 'linux' && cachedPlatform !== 'darwin')) return;
 
   try {
     const lyric = lrcArray.value[index];

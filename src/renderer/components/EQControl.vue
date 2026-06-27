@@ -308,9 +308,9 @@ const formatFreq = (freq: number) => {
   --n-rail-height: 4px;
   --n-rail-color: #e5e7eb;
   --n-rail-color-hover: #d1d5db;
-  --n-fill-color: #e08a3c;
-  --n-fill-color-hover: #c5702a;
-  --n-handle-color: #e08a3c;
+  --n-fill-color: #307fb6;
+  --n-fill-color-hover: #005b90;
+  --n-handle-color: #307fb6;
   --n-handle-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   .n-slider-handle {

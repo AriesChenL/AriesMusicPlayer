@@ -467,7 +467,7 @@ class DownloadManager {
       const sanitizedFilename = sanitizeFilename(formattedFilename);
 
       // Temp directory
-      const tempDir = path.join(os.tmpdir(), 'AlgerMusicPlayerTemp');
+      const tempDir = path.join(os.tmpdir(), 'AriesMusicTemp');
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }
@@ -1002,7 +1002,7 @@ class DownloadManager {
 
   private cleanOrphanedTempFiles(): void {
     try {
-      const tempDir = path.join(os.tmpdir(), 'AlgerMusicPlayerTemp');
+      const tempDir = path.join(os.tmpdir(), 'AriesMusicTemp');
       if (!fs.existsSync(tempDir)) return;
 
       const knownTempPaths = new Set(

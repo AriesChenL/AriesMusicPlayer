@@ -1,41 +1,16 @@
 <template>
   <div class="flex items-center gap-2 pt-6 pb-4 page-padding">
-    <!-- ── LEFT: Tabs（搜索展开时隐藏）─────────────── -->
-    <transition name="tab-slide">
-      <div
-        v-if="!isSearchExpanded && !showBackButton"
-        class="tabs-track flex-shrink-0"
-        ref="tabsTrackRef"
-      >
-        <div class="tab-slider-bg" :style="sliderStyle" />
-        <button
-          v-for="(tab, i) in tabs"
-          :key="tab.key"
-          :ref="(el) => setTabRef(el as HTMLElement, i)"
-          class="tab-btn"
-          :class="isTabActive(tab.path) ? 'tab-btn--on' : 'tab-btn--off'"
-          @click="router.push(tab.path)"
-        >
-          <i :class="tab.icon" />
-          <span>{{ tab.label }}</span>
-        </button>
-      </div>
-
-      <!-- 返回按钮 + 页面标题（meta.back 页面）-->
-      <div v-else-if="showBackButton" class="flex items-center gap-2 flex-shrink-0">
-        <button class="back-btn" @click="goBack">
-          <i class="ri-arrow-left-line" />
-        </button>
-        <transition name="nav-title">
-          <span v-if="navTitleStore.isVisible && !isSearchExpanded" class="nav-page-title">
-            {{ navTitleStore.title }}
-          </span>
-        </transition>
-      </div>
-    </transition>
-
-    <!-- ── SPACER（搜索收起时撑开间距）─────────────── -->
-    <div v-if="!isSearchExpanded" class="flex-1" />
+    <!-- 返回按钮 + 页面标题（meta.back 详情页；搜索框为左对齐主元素）-->
+    <div v-if="showBackButton && !isSearchExpanded" class="flex items-center gap-2 flex-shrink-0">
+      <button class="back-btn" @click="goBack">
+        <i class="ri-arrow-left-line" />
+      </button>
+      <transition name="nav-title">
+        <span v-if="navTitleStore.isVisible" class="nav-page-title">
+          {{ navTitleStore.title }}
+        </span>
+      </transition>
+    </div>
 
     <!-- 搜索输入框（收起时固定宽，展开时 flex-1 撑满）-->
     <div class="search-wrap" :class="isSearchExpanded ? 'search-wrap--open' : 'search-wrap--idle'">
@@ -97,6 +72,9 @@
         </div>
       </n-popover>
     </div>
+
+    <!-- ── SPACER（搜索收起时撑开间距，按钮靠右）─────────────── -->
+    <div v-if="!isSearchExpanded" class="flex-1" />
 
     <!-- 下载按钮 -->
     <button v-if="showDownloadButton" class="action-btn" @click="navigateToDownloads">
@@ -200,11 +178,9 @@
     </n-popover>
 
     <!-- GitHub -->
-    <coffee :alipay-q-r="alipay" :wechat-q-r="wechat">
-      <button class="action-btn" @click="toGithub">
-        <i class="ri-github-fill" />
-      </button>
-    </coffee>
+    <button class="action-btn" @click="toGithub">
+      <i class="ri-github-fill" />
+    </button>
   </div>
 </template>
 
@@ -212,14 +188,11 @@
 import { useDebounceFn } from '@vueuse/core';
 import { computed, onMounted, ref, watch, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import { getSearchKeyword } from '@/api/home';
 import { getUserDetail } from '@/api/login';
 import { getSearchSuggestions } from '@/api/search';
-import alipay from '@/assets/alipay.png';
-import wechat from '@/assets/wechat.png';
-import Coffee from '@/components/Coffee.vue';
 import { SEARCH_TYPES, USER_SET_OPTIONS } from '@/const/bar-const';
 import { useZoom } from '@/hooks/useZoom';
 import { useDownloadStore } from '@/store/modules/download';
@@ -234,7 +207,6 @@ import { checkUpdate, UpdateResult } from '@/utils/update';
 import config from '../../../../package.json';
 
 const router = useRouter();
-const route = useRoute();
 const navTitleStore = useNavTitleStore();
 const searchStore = useSearchStore();
 const settingsStore = useSettingsStore();
@@ -272,48 +244,6 @@ const showBackButton = computed(() => {
   return meta.back === true;
 });
 const goBack = () => router.back();
-
-// ── Tabs ──────────────────────────────────────────────
-const tabs = computed(() => {
-  const items = [
-    { key: 'home', label: t('comp.home'), path: '/', icon: 'ri-home-4-fill' },
-    { key: 'playlist', label: t('comp.list'), path: '/list', icon: 'ri-play-list-2-fill' },
-    { key: 'album', label: t('comp.newAlbum.title'), path: '/album', icon: 'ri-album-fill' },
-    {
-      key: 'charts',
-      label: t('comp.toplist'),
-      path: '/toplist',
-      icon: 'ri-bar-chart-grouped-fill'
-    },
-    { key: 'mv', label: t('comp.mv'), path: '/mv', icon: 'ri-movie-2-fill' },
-    {
-      key: 'localMusic',
-      label: t('comp.localMusic'),
-      path: '/local-music',
-      icon: 'ri-folder-music-fill',
-      electronOnly: true
-    }
-  ];
-  return items.filter((tab) => !tab.electronOnly || isElectron);
-});
-const isTabActive = (path: string) => route.path === path;
-
-// Sliding pill
-const tabsTrackRef = ref<HTMLElement | null>(null);
-const tabElsRef = ref<HTMLElement[]>([]);
-const setTabRef = (el: HTMLElement, i: number) => {
-  if (el) tabElsRef.value[i] = el;
-};
-const activeTabIndex = computed(() => tabs.value.findIndex((t) => isTabActive(t.path)));
-const sliderStyle = computed(() => {
-  const el = tabElsRef.value[activeTabIndex.value];
-  if (!el) return { opacity: '0' };
-  return {
-    transform: `translateX(${el.offsetLeft}px)`,
-    width: `${el.offsetWidth}px`,
-    opacity: '1'
-  };
-});
 
 // ── Search expand / collapse ──────────────────────────
 const isSearchExpanded = ref(false);
@@ -450,9 +380,10 @@ watchEffect(() => {
 
 const restartApp = () => window.electron.ipcRenderer.send('restart');
 const toLogin = () => router.push('/user');
-const toGithub = () => window.open('http://donate.alger.fun/download', '_blank');
+const toGithub = () =>
+  window.open('https://github.com/AriesChenL/AlgerMusicPlayer/releases', '_blank');
 const toGithubRelease = () => {
-  window.location.href = 'https://donate.alger.fun/download';
+  window.location.href = 'https://github.com/AriesChenL/AlgerMusicPlayer/releases';
 };
 
 const isDark = computed({
@@ -501,66 +432,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ── Tab track ───────────────────────────────────────── */
-.tabs-track {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 34px;
-  background: var(--chip);
-  border-radius: 9999px;
-  padding: 3px;
-  gap: 0;
-  box-sizing: border-box;
-}
-
-.tab-slider-bg {
-  position: absolute;
-  top: 3px;
-  left: 0;
-  height: calc(100% - 6px);
-  border-radius: 9999px;
-  background: var(--accent);
-  box-shadow: 0 1px 6px var(--accentLine);
-  transition:
-    transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1),
-    width 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.tab-btn {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 13px;
-  border-radius: 9999px;
-  font-size: 12.5px;
-  font-weight: 600;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color 0.2s;
-}
-.tab-btn--on {
-  color: #fff;
-}
-.tab-btn--off {
-  color: #6b7280;
-}
-.dark .tab-btn--off {
-  color: #9ca3af;
-}
-.tab-btn--off:hover {
-  color: #111827;
-}
-.dark .tab-btn--off:hover {
-  color: #f9fafb;
-}
-
 /* ── Back button ─────────────────────────────────────── */
 .back-btn {
   display: flex;
@@ -592,8 +463,8 @@ onMounted(() => {
     max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .search-wrap--idle {
-  flex: 0 0 240px;
-  max-width: 240px;
+  flex: 1 1 0%;
+  max-width: 560px;
 }
 .search-wrap--open {
   flex: 1 1 0%;
@@ -912,7 +783,7 @@ onMounted(() => {
 }
 .dark .suggest-row:hover,
 .dark .suggest-row--hi {
-  background: rgba(34, 197, 94, 0.06);
+  background: rgba(48, 127, 182, 0.12);
   color: var(--accent);
 }
 .suggest-icon {
@@ -942,18 +813,6 @@ onMounted(() => {
 }
 
 /* ── Transitions ─────────────────────────────────────── */
-.tab-slide-enter-active,
-.tab-slide-leave-active {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-.tab-slide-enter-from,
-.tab-slide-leave-to {
-  opacity: 0;
-  transform: translateX(-8px);
-}
-
 .nav-title-enter-active {
   transition:
     opacity 0.22s ease,

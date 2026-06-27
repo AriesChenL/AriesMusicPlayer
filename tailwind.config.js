@@ -6,41 +6,42 @@ export default {
     extend: {
       colors: {
         primary: {
-          // 暖色琥珀强调色（设计稿 --accent / --accent2）
-          DEFAULT: '#e08a3c',
-          light: '#f4a85e',
-          dark: '#c5702a',
-          hover: '#f4a85e',
-          pressed: '#c5702a',
-          // 数值梯度：供原绿色梯度类（green-50..900）平滑迁移
-          50: '#fdf3e7',
-          100: '#fbe4c9',
-          200: '#f6cb98',
-          300: '#f1ad66',
-          400: '#ea9747',
-          500: '#e08a3c',
-          600: '#c5702a',
-          700: '#a3591f',
-          800: '#80471c',
-          900: '#693c1a'
+          // 蓝色单色渐变强调色（调色板 50→950）
+          DEFAULT: '#307fb6',
+          light: '#5ca9e3',
+          dark: '#005b90',
+          hover: '#3f8dc5',
+          pressed: '#005b90',
+          // 数值梯度：与调色板一一对应
+          50: '#b3ffff',
+          100: '#96e4ff',
+          200: '#79c6ff',
+          300: '#5ca9e3',
+          400: '#3f8dc5',
+          500: '#307fb6',
+          600: '#005b90',
+          700: '#00396b',
+          800: '#001848',
+          900: '#00002f',
+          950: '#02001b'
         },
         secondary: {
-          DEFAULT: '#8a7c6e',
-          light: '#bcae9f',
-          dark: '#6d5f50'
+          DEFAULT: '#3a5a78',
+          light: '#9fb3c8',
+          dark: '#6e8aa4'
         },
         dark: {
-          // 暖色窗口 / 面板层级（设计稿 --win / --panel / --panel2 / --elev）
-          DEFAULT: '#1b1612',
-          100: '#241e19',
-          200: '#2b241e',
-          300: '#322a23'
+          // 深海军蓝窗口 / 面板层级（设计稿 --win / --panel / --panel2 / --elev）
+          DEFAULT: '#060b18',
+          100: '#0c1426',
+          200: '#111a30',
+          300: '#16213c'
         },
         light: {
           DEFAULT: '#fff',
-          100: '#f7f0e7',
-          200: '#f2e9dd',
-          300: '#ece0d2'
+          100: '#f0f6fc',
+          200: '#e4eef7',
+          300: '#d7e6f3'
         }
       }
     }

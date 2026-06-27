@@ -286,7 +286,7 @@ export default {
     manualUpdate: '官网更新',
     gotoGithub: '前往 Github',
     author: '作者',
-    authorDesc: 'algerkong 点个star🌟呗',
+    authorDesc: 'lynn 点个star🌟呗',
     messages: {
       checkError: '检查更新失败，请稍后重试'
     }
@@ -398,10 +398,10 @@ export default {
       imageTooLarge: '图片过大,请选择小于 20MB 的图片'
     }
   },
-  translationEngine: '歌詞翻譯引擎',
+  translationEngine: '歌词翻译引擎',
   translationEngineOptions: {
     none: '关闭',
-    opencc: 'OpenCC 繁化'
+    opencc: 'OpenCC 简化'
   },
   themeColor: {
     title: '歌词主题色',
@@ -422,7 +422,7 @@ export default {
       openColorPicker: '打开色板',
       closeColorPicker: '关闭色板'
     },
-    placeholder: '#1db954'
+    placeholder: '#5ca9e3'
   },
   shortcutSettings: {
     title: '快捷键设置',

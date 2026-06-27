@@ -289,7 +289,7 @@ export default {
     manualUpdate: '手動更新',
     gotoGithub: 'Githubへ',
     author: '作者',
-    authorDesc: 'algerkong スターを付けてください🌟',
+    authorDesc: 'lynn スターを付けてください🌟',
     messages: {
       checkError: '更新確認に失敗しました。後でもう一度お試しください'
     }
@@ -404,7 +404,7 @@ export default {
   translationEngine: '歌詞翻訳エンジン',
   translationEngineOptions: {
     none: 'オフ',
-    opencc: 'OpenCC 繁体字化'
+    opencc: 'OpenCC 簡体字化'
   },
   themeColor: {
     title: '歌詞テーマカラー',
@@ -425,7 +425,7 @@ export default {
       openColorPicker: 'カラーパレットを開く',
       closeColorPicker: 'カラーパレットを閉じる'
     },
-    placeholder: '#1db954'
+    placeholder: '#5ca9e3'
   },
   shortcutSettings: {
     title: 'ショートカット設定',

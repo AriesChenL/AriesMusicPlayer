@@ -321,8 +321,8 @@ const PRESET_LYRIC_COLORS: LyricThemeColor[] = [
   {
     id: 'amber',
     name: 'Amber', // 设计稿暖色琥珀，作为默认高亮色
-    light: '#e08a3c',
-    dark: '#f4a85e'
+    light: '#307fb6',
+    dark: '#5ca9e3'
   },
   {
     id: 'spotify-green',

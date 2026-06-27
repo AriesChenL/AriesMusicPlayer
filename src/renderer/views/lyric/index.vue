@@ -347,7 +347,7 @@ const isHovering = ref(false);
 
 // 主题色相关状态
 const showThemeColorPanel = ref(false);
-const currentHighlightColor = ref('#1db954');
+const currentHighlightColor = ref('#5ca9e3');
 
 // 计算是否栏
 const showControls = computed(() => {
@@ -1182,7 +1182,7 @@ body,
   &.light {
     --text-color: #383838;
     --text-secondary: #282828ae;
-    --highlight-color: var(--lyric-highlight-color, #1db954);
+    --highlight-color: var(--lyric-highlight-color, #5ca9e3);
     --control-bg: rgba(38, 38, 38, 0.532);
     &:hover:not(.lyric_lock) {
       background: rgba(0, 0, 0, 0.434) !important;

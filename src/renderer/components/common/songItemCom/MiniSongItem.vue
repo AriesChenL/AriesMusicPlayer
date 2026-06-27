@@ -224,8 +224,8 @@ const onPlayMusic = () => {
 
       &:hover,
       &.bg-primary-600 {
-        background-color: rgb(34 197 94); /* bg-primary-500 = #e08a3c */
-        border-color: rgb(34 197 94);
+        background-color: #307fb6; /* bg-primary-500 = #307fb6 */
+        border-color: #307fb6;
         color: white;
       }
     }

@@ -36,7 +36,7 @@
         v-if="playLoading || isBuffering"
         class="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
       >
-        <n-spin size="large" stroke="#10b981" />
+        <n-spin size="large" stroke="#307fb6" />
       </div>
 
       <!-- Mobile: Center Play Button Overlay -->
@@ -565,8 +565,8 @@ onUnmounted(() => {
   --n-rail-height: 4px !important;
   --n-rail-color: rgba(255, 255, 255, 0.2) !important;
   --n-rail-color-hover: rgba(255, 255, 255, 0.3) !important;
-  --n-fill-color: #10b981 !important;
-  --n-fill-color-hover: #34d399 !important;
+  --n-fill-color: #307fb6 !important;
+  --n-fill-color-hover: #5ca9e3 !important;
   --n-handle-size: 12px !important;
   --n-handle-color: #fff !important;
 }

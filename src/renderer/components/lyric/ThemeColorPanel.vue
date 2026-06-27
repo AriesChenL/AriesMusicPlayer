@@ -115,7 +115,7 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   visible: false,
-  currentColor: '#e08a3c',
+  currentColor: '#307fb6',
   theme: 'dark'
 });
 

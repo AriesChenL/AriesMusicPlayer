@@ -9,7 +9,7 @@
     :mask-closable="false"
   >
     <n-drawer-content
-      title="欢迎使用 AlgerMusicPlayer"
+      title="欢迎使用 AriesMusic"
       closable
       :native-scrollbar="false"
       class="mac-style-drawer"
@@ -32,43 +32,15 @@
 
           <div class="action-links">
             <a
-              href="https://mp.weixin.qq.com/s/9pr1XQB36gShM_-TG2LBdg"
+              href="https://github.com/AriesChenL/AlgerMusicPlayer/releases"
               target="_blank"
-              class="doc-link"
+              class="download-link"
             >
-              <i class="ri-file-text-line mr-1"></i> 查看使用文档
-            </a>
-            <a href="http://donate.alger.fun/download" target="_blank" class="download-link">
               <i class="ri-download-2-line mr-1"></i> 立即下载
             </a>
           </div>
 
-          <div class="qrcode-section">
-            <img class="qrcode" src="@/assets/gzh.png" alt="公众号" />
-            <p>关注公众号获取最新版本与更新信息</p>
-          </div>
-
-          <div class="support-section">
-            <h4>支持项目</h4>
-            <p class="support-desc">您的支持是我们持续改进的动力</p>
-            <div class="payment-options">
-              <div class="payment-option">
-                <div class="payment-icon wechat">
-                  <img src="@/assets/wechat.png" alt="微信支付" />
-                </div>
-                <span>微信支付</span>
-              </div>
-              <div class="payment-option">
-                <div class="payment-icon alipay">
-                  <img src="@/assets/alipay.png" alt="支付宝" />
-                </div>
-                <span>支付宝</span>
-              </div>
-            </div>
-          </div>
-
           <div class="drawer-actions">
-            <n-button secondary class="action-button" @click="markAsDonated">已支持</n-button>
             <n-button type="primary" class="action-button primary" @click="remindLater"
               >稍后提醒</n-button
             >
@@ -99,11 +71,6 @@ const remindLater = () => {
   showDrawer.value = false;
 };
 
-// 标记为已捐赠（永久不再提示）
-const markAsDonated = () => {
-  localStorage.setItem('trafficDonated4Never', '1');
-  showDrawer.value = false;
-};
 // 组件挂载时检查是否需要显示
 onMounted(() => {
   // 优先判断是否永久不再提示

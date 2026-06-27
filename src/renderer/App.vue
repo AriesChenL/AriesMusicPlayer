@@ -8,7 +8,6 @@
         <n-message-provider>
           <router-view></router-view>
           <traffic-warning-drawer v-if="!isElectron"></traffic-warning-drawer>
-          <disclaimer-modal></disclaimer-modal>
         </n-message-provider>
       </n-dialog-provider>
     </n-config-provider>
@@ -22,7 +21,6 @@ import { computed, nextTick, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
-import DisclaimerModal from '@/components/common/DisclaimerModal.vue';
 import TrafficWarningDrawer from '@/components/TrafficWarningDrawer.vue';
 import { usePlayerStore } from '@/store/modules/player';
 import { usePlayerCoreStore } from '@/store/modules/playerCore';
@@ -37,42 +35,43 @@ import { initLxMusicRunner } from './services/LxMusicSourceRunner';
 import { isMobile } from './utils';
 import { useAppShortcuts } from './utils/appShortcuts';
 
-// naive-ui 主题覆盖：暖色琥珀强调色与暖色暗色面板（设计稿配色）
-const PRIMARY = '#e08a3c';
-const PRIMARY_HOVER = '#f4a85e';
-const PRIMARY_PRESSED = '#c5702a';
+// naive-ui 主题覆盖：蓝色强调色（与 --accent 令牌一致）与深海军蓝面板
+const PRIMARY = '#307fb6';
+const PRIMARY_HOVER = '#3f8dc5';
+const PRIMARY_PRESSED = '#005b90';
 
 const commonThemeOverrides: GlobalThemeOverrides['common'] = {
   primaryColor: PRIMARY,
   primaryColorHover: PRIMARY_HOVER,
   primaryColorPressed: PRIMARY_PRESSED,
   primaryColorSuppl: PRIMARY_HOVER,
-  borderRadius: '12px',
-  borderRadiusSmall: '9px'
+  // 绑定到圆角令牌，使设置里的「圆角风格」对所有 naive-ui 组件生效
+  borderRadius: 'var(--rb)',
+  borderRadiusSmall: 'var(--rs)'
 };
 
 const lightThemeOverrides: GlobalThemeOverrides = {
   common: {
     ...commonThemeOverrides,
-    bodyColor: '#fbf6ef',
+    bodyColor: '#eef5fb',
     cardColor: '#ffffff',
     modalColor: '#ffffff',
     popoverColor: '#ffffff',
     tableColor: '#ffffff',
-    inputColor: '#f7f0e7',
-    borderColor: 'rgba(80,50,20,.15)'
+    inputColor: '#f0f6fc',
+    borderColor: 'rgba(0,57,107,.15)'
   }
 };
 
 const darkThemeOverrides: GlobalThemeOverrides = {
   common: {
     ...commonThemeOverrides,
-    bodyColor: '#1b1612',
-    cardColor: '#241e19',
-    modalColor: '#241e19',
-    popoverColor: '#2b241e',
-    tableColor: '#241e19',
-    inputColor: '#2b241e',
+    bodyColor: '#060b18',
+    cardColor: '#0c1426',
+    modalColor: '#0c1426',
+    popoverColor: '#111a30',
+    tableColor: '#0c1426',
+    inputColor: '#111a30',
     borderColor: 'rgba(255,255,255,.11)'
   }
 };

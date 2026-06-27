@@ -239,7 +239,7 @@ const onPlayMusic = () => {
       }
 
       &.bg-primary-600 {
-        background-color: rgb(34 197 94);
+        background-color: #005b90;
         color: white;
       }
     }

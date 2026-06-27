@@ -24,10 +24,7 @@ interface SongInfo {
 }
 
 let tray: Tray | null = null;
-// 为macOS状态栏添加控制图标
-let playPauseTray: Tray | null = null;
-let prevTray: Tray | null = null;
-let nextTray: Tray | null = null;
+// macOS 菜单栏仅保留歌词/歌名文本项（logo 由主托盘承载，播放控制走右键菜单）
 let songTitleTray: Tray | null = null;
 
 let isPlaying = false;
@@ -112,19 +109,9 @@ function getStatusBarText(): string {
   return songName;
 }
 
-// 确保 macOS 状态栏图标能正确显示
-function getProperIconSize() {
-  // macOS 状态栏通常高度为22像素
-  const height = 18;
-  const width = 18;
-  return { width, height };
-}
-
 // 更新macOS状态栏图标
 function updateStatusBarTray() {
   if (process.platform !== 'darwin') return;
-
-  const iconSize = getProperIconSize();
 
   // 更新菜单栏文本：优先当前歌词行，无歌词时回退歌名
   if (songTitleTray) {
@@ -135,22 +122,6 @@ function updateStatusBarTray() {
     // tooltip 始终展示完整歌曲信息，便于识别正在播放的曲目
     const fullTitle = currentSong ? getSongTitle(currentSong) : '未播放';
     songTitleTray.setToolTip(fullTitle);
-  }
-
-  // 更新播放/暂停图标
-  if (playPauseTray) {
-    // 使用PNG图标替代文本
-    const iconPath = join(
-      app.getAppPath(),
-      'resources/icons',
-      isPlaying ? 'pause.png' : 'play.png'
-    );
-    const icon = nativeImage.createFromPath(iconPath).resize(iconSize);
-    icon.setTemplateImage(true); // 设置为模板图片，适合macOS深色/浅色模式
-    playPauseTray.setImage(icon);
-    playPauseTray.setToolTip(
-      isPlaying ? i18n.global.t('common.tray.pause') : i18n.global.t('common.tray.play')
-    );
   }
 }
 
@@ -353,44 +324,8 @@ function initializeStatusBarTray(mainWindow: BrowserWindow) {
   const store = getStore();
   if (process.platform !== 'darwin' || !store.get('set.showTopAction')) return;
 
-  const iconSize = getProperIconSize();
-
-  // 创建下一首按钮（调整顺序，先创建下一首按钮）
-  const nextIcon = nativeImage
-    .createFromPath(join(app.getAppPath(), 'resources/icons', 'next.png'))
-    .resize(iconSize);
-  nextIcon.setTemplateImage(true); // 设置为模板图片，适合macOS深色/浅色模式
-  nextTray = new Tray(nextIcon);
-  nextTray.setToolTip(i18n.global.t('common.tray.next'));
-  nextTray.on('click', () => {
-    mainWindow.webContents.send('global-shortcut', 'nextPlay');
-  });
-
-  // 创建播放/暂停按钮
-  const playPauseIcon = nativeImage
-    .createFromPath(join(app.getAppPath(), 'resources/icons', isPlaying ? 'pause.png' : 'play.png'))
-    .resize(iconSize);
-  playPauseIcon.setTemplateImage(true); // 设置为模板图片，适合macOS深色/浅色模式
-  playPauseTray = new Tray(playPauseIcon);
-  playPauseTray.setToolTip(
-    isPlaying ? i18n.global.t('common.tray.pause') : i18n.global.t('common.tray.play')
-  );
-  playPauseTray.on('click', () => {
-    mainWindow.webContents.send('global-shortcut', 'togglePlay');
-  });
-
-  // 创建上一首按钮（调整顺序，最后创建上一首按钮）
-  const prevIcon = nativeImage
-    .createFromPath(join(app.getAppPath(), 'resources/icons', 'prev.png'))
-    .resize(iconSize);
-  prevIcon.setTemplateImage(true); // 设置为模板图片，适合macOS深色/浅色模式
-  prevTray = new Tray(prevIcon);
-  prevTray.setToolTip(i18n.global.t('common.tray.prev'));
-  prevTray.on('click', () => {
-    mainWindow.webContents.send('global-shortcut', 'prevPlay');
-  });
-
-  // 歌词/歌名显示项：纯文本，不带图标（音符图标由主托盘承载，避免重复）
+  // 菜单栏仅显示 logo（主托盘）+ 歌词/歌名文本，不再放上一曲/播放暂停/下一曲控制按钮
+  // 歌词/歌名显示项：纯文本，不带图标（logo 由主托盘承载，避免重复）
   songTitleTray = new Tray(nativeImage.createEmpty());
 
   // 初始化显示文本
@@ -422,7 +357,7 @@ export function initializeTray(iconPath: string, mainWindow: BrowserWindow) {
 
   let trayIcon: Electron.NativeImage;
   if (isMac) {
-    // macOS 菜单栏使用单色音符模板图标，与播放控制图标保持同一视觉风格
+    // macOS 菜单栏使用单色 Aries logo 模板图标（随深浅色自动适配）
     trayIcon = nativeImage
       .createFromPath(join(app.getAppPath(), 'resources/icons', 'note.png'))
       .resize({ width: iconSize, height: iconSize });
@@ -437,7 +372,7 @@ export function initializeTray(iconPath: string, mainWindow: BrowserWindow) {
   tray = new Tray(trayIcon);
 
   // 设置托盘图标的提示文字
-  tray.setToolTip('Alger Music Player');
+  tray.setToolTip('AriesMusic');
 
   // 初始化菜单
   updateTrayMenu(mainWindow);

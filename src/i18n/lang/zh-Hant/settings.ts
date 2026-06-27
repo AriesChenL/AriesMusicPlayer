@@ -282,7 +282,7 @@ export default {
     manualUpdate: '官網更新',
     gotoGithub: '前往 Github',
     author: '作者',
-    authorDesc: 'algerkong 點個star🌟呗',
+    authorDesc: 'lynn 點個star🌟呗',
     messages: {
       checkError: '檢查更新失敗，請稍後重試'
     }
@@ -413,12 +413,12 @@ export default {
       openColorPicker: '開啟色板',
       closeColorPicker: '關閉色板'
     },
-    placeholder: '#1db954'
+    placeholder: '#5ca9e3'
   },
   translationEngine: '歌詞翻譯引擎',
   translationEngineOptions: {
     none: '關閉',
-    opencc: 'OpenCC 繁化'
+    opencc: 'OpenCC 簡化'
   },
   shortcutSettings: {
     title: '快捷鍵設定',

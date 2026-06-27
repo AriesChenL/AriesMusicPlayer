@@ -215,9 +215,11 @@ export const useSettingsStore = defineStore('settings', () => {
       theme.value = manualTheme;
       applyTheme(manualTheme);
     }
-    // 应用暖色设计令牌：强调色与圆角
-    applyAccent((setData.value.themeAccent as AccentType) || 'orange');
-    applyRadius((setData.value.themeRadius as RadiusType) || 'default');
+    // 设计令牌：强调色（蓝）与圆角不开放给用户。
+    // 强调色直接由 design-tokens 的 :root / [data-theme] 定义，无需 data-accent 覆盖；
+    // 这里清掉历史可能残留的 data-accent，并固定默认圆角。
+    applyAccent('orange'); // 'orange' 会移除 data-accent 属性 → 使用 :root 蓝色默认
+    applyRadius('default');
   };
 
   const initializeSystemFonts = async () => {

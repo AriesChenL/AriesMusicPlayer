@@ -25,6 +25,25 @@
     </n-tooltip>
   </n-dropdown>
 
+  <!-- 换源重解析弹窗 -->
+  <n-modal
+    v-model:show="showReparseModal"
+    :mask-closable="true"
+    :unstable-show-mask="false"
+    :z-index="9999999"
+  >
+    <div class="reparse-modal-content">
+      <div class="modal-close" @click="showReparseModal = false">
+        <i class="ri-close-line"></i>
+      </div>
+      <h3>{{ t('player.playBar.reparse') }}</h3>
+      <div class="reparse-modal-trigger">
+        <reparse-popover v-if="playMusic?.id" />
+        <span class="reparse-modal-hint">{{ t('player.reparse.title') }}</span>
+      </div>
+    </div>
+  </n-modal>
+
   <!-- EQ 均衡器弹窗 -->
   <n-modal
     v-model:show="showEQModal"
@@ -99,8 +118,11 @@ import { computed, h, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import EqControl from '@/components/EQControl.vue';
+import ReparsePopover from '@/components/player/ReparsePopover.vue';
 import SleepTimer from '@/components/player/SleepTimer.vue';
+import { isLyricWindowOpen, openLyric, playMusic } from '@/hooks/MusicHook';
 import { usePlayerStore } from '@/store/modules/player';
+import { isElectron } from '@/utils';
 
 const { t } = useI18n();
 const playerStore = usePlayerStore();
@@ -109,6 +131,7 @@ const playerStore = usePlayerStore();
 const showDropdown = ref(false);
 const showEQModal = ref(false);
 const showSpeedModal = ref(false);
+const showReparseModal = ref(false);
 const isEQVisible = ref(false);
 
 // 监听弹窗状态，确保互斥
@@ -160,31 +183,54 @@ const hasActiveSettings = computed(() => {
   return playbackRate.value !== 1.0 || hasActiveSleepTimer.value || isEQVisible.value;
 });
 
-// 下拉菜单选项
-const dropdownOptions = computed<DropdownOption[]>(() => [
-  {
-    label: t('player.playBar.eq'),
-    key: 'eq',
-    icon: () => h('i', { class: 'ri-equalizer-line' })
-  },
-  {
-    label: t('player.sleepTimer.title'),
-    key: 'timer',
-    icon: () => h('i', { class: 'ri-timer-line' }),
-    // 如果有激活的定时器，添加标记
-    suffix: () => (hasActiveSleepTimer.value ? h('span', { class: 'active-option-mark' }) : null)
-  },
-  {
-    label: t('player.playBar.playbackSpeed') + `(${playbackRate.value}x)`,
-    key: 'speed',
-    icon: () => h('i', { class: 'ri-speed-line' }),
-    // 如果播放速度不是1.0，添加标记
-    suffix: () =>
-      playbackRate.value !== 1.0
-        ? h('span', { class: 'active-option-mark' }, `${playbackRate.value}x`)
-        : null
+// 下拉菜单选项（设计稿「设置齿轮」整合：歌词 / 换源重解析 / EQ / 定时 / 倍速）
+const dropdownOptions = computed<DropdownOption[]>(() => {
+  const opts: DropdownOption[] = [];
+  if (isElectron) {
+    opts.push({
+      label: t('player.playBar.lyric'),
+      key: 'lyric',
+      disabled: !playMusic.value?.id,
+      icon: () =>
+        h('i', {
+          class: 'ri-netease-cloud-music-line',
+          style: isLyricWindowOpen.value ? 'color:var(--accent)' : ''
+        })
+    });
+    if (playMusic.value?.id) {
+      opts.push({
+        label: t('player.playBar.reparse'),
+        key: 'reparse',
+        icon: () => h('i', { class: 'ri-refresh-line' })
+      });
+    }
   }
-]);
+  opts.push(
+    {
+      label: t('player.playBar.eq'),
+      key: 'eq',
+      icon: () => h('i', { class: 'ri-equalizer-line' })
+    },
+    {
+      label: t('player.sleepTimer.title'),
+      key: 'timer',
+      icon: () => h('i', { class: 'ri-timer-line' }),
+      // 如果有激活的定时器，添加标记
+      suffix: () => (hasActiveSleepTimer.value ? h('span', { class: 'active-option-mark' }) : null)
+    },
+    {
+      label: t('player.playBar.playbackSpeed') + `(${playbackRate.value}x)`,
+      key: 'speed',
+      icon: () => h('i', { class: 'ri-speed-line' }),
+      // 如果播放速度不是1.0，添加标记
+      suffix: () =>
+        playbackRate.value !== 1.0
+          ? h('span', { class: 'active-option-mark' }, `${playbackRate.value}x`)
+          : null
+    }
+  );
+  return opts;
+});
 
 // 处理菜单选择
 const handleSelect = (key: string) => {
@@ -192,9 +238,16 @@ const handleSelect = (key: string) => {
   showEQModal.value = false;
   playerStore.showSleepTimer = false;
   showSpeedModal.value = false;
+  showReparseModal.value = false;
 
   // 然后仅打开所选弹窗
   switch (key) {
+    case 'lyric':
+      if (playMusic.value?.id) openLyric();
+      break;
+    case 'reparse':
+      showReparseModal.value = true;
+      break;
     case 'eq':
       showEQModal.value = true;
       break;
@@ -273,10 +326,27 @@ const selectSpeed = (speed: number) => {
 
 .eq-modal-content,
 .timer-modal-content,
-.speed-modal-content {
+.speed-modal-content,
+.reparse-modal-content {
   @apply p-6 rounded-3xl bg-light-100 dark:bg-dark-100 bg-opacity-80 filter backdrop-blur-sm;
   max-width: 600px;
   margin: 0 auto;
+}
+
+.reparse-modal-content {
+  min-width: 320px;
+
+  h3 {
+    @apply text-lg font-medium mb-4 text-center;
+  }
+
+  .reparse-modal-trigger {
+    @apply flex items-center justify-center gap-3 py-4;
+
+    .reparse-modal-hint {
+      @apply text-sm opacity-70;
+    }
+  }
 }
 
 .eq-modal-content {

@@ -90,7 +90,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
-import { getToplist } from '@/api/list';
+import { getListDetail, getToplist } from '@/api/list';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import { calculateAnimationDelay, getImgUrl } from '@/utils';
 
@@ -98,32 +98,49 @@ defineOptions({
   name: 'Toplist'
 });
 
+// 官方榜卡片数量（贴设计稿：3 张 Top3 预览卡，其余进「更多榜单」）
+const OFFICIAL_COUNT = 3;
+
 const { t } = useI18n();
 const router = useRouter();
 const topList = ref<any[]>([]);
 const loading = ref(false);
 
-// 暖色渐变调色板（与琥珀主题协调，循环使用）
+// 蓝色单色渐变调色板（与主题协调，循环使用，深浅交替增加层次）
 const GRADIENTS = [
-  'linear-gradient(135deg,#e0934a,#9a4a2a)',
-  'linear-gradient(135deg,#b07a9a,#5a3a6a)',
-  'linear-gradient(135deg,#7a9a6a,#2a4a3a)',
-  'linear-gradient(135deg,#c98a5a,#6a3a4a)',
-  'linear-gradient(135deg,#8a7aaa,#3a2a4a)',
-  'linear-gradient(135deg,#caa06a,#6a4a2a)'
+  'linear-gradient(135deg,#3f8dc5,#005b90)',
+  'linear-gradient(135deg,#5ca9e3,#307fb6)',
+  'linear-gradient(135deg,#307fb6,#00396b)',
+  'linear-gradient(135deg,#79c6ff,#3f8dc5)',
+  'linear-gradient(135deg,#005b90,#001848)',
+  'linear-gradient(135deg,#96e4ff,#5ca9e3)'
 ];
 const gradientFor = (i: number) => GRADIENTS[i % GRADIENTS.length];
 
-// 有 Top3 预览的为「官方榜」，其余进「更多榜单」
-const officialRanks = computed(() => {
-  const withTracks = topList.value.filter((r) => r.tracks && r.tracks.length);
-  // 兜底：接口未返回 tracks 时，取前 6 个作为官方榜
-  return withTracks.length ? withTracks : topList.value.slice(0, 6);
-});
-const moreRanks = computed(() => {
-  const officialIds = new Set(officialRanks.value.map((r) => r.id));
-  return topList.value.filter((r) => !officialIds.has(r.id));
-});
+// 前 N 个为「官方榜」（Top3 预览卡），其余进「更多榜单」
+const officialRanks = computed(() => topList.value.slice(0, OFFICIAL_COUNT));
+const moreRanks = computed(() => topList.value.slice(OFFICIAL_COUNT));
+
+// 为官方榜拉取前 3 首歌（接口的 /toplist 不带 tracks，需逐个取歌单详情）
+const loadOfficialTracks = async () => {
+  await Promise.all(
+    officialRanks.value.map(async (rank) => {
+      if (rank.tracks && rank.tracks.length) return;
+      try {
+        const { data } = await getListDetail(rank.id);
+        const songs = (data?.playlist?.tracks || []).slice(0, 3).map((s: any) => ({
+          first: s.name,
+          second: (s.ar || s.artists || []).map((a: any) => a.name).join(' / ')
+        }));
+        rank.tracks = songs;
+      } catch (e) {
+        console.warn('获取榜单 Top3 失败:', rank.name, e);
+      }
+    })
+  );
+  // 触发响应式更新
+  topList.value = [...topList.value];
+};
 
 const openToplist = (item: any) => {
   try {
@@ -144,6 +161,8 @@ const loadToplist = async () => {
   try {
     const { data } = await getToplist();
     topList.value = data.list || [];
+    // 异步填充官方榜 Top3（不阻塞卡片头部渲染）
+    loadOfficialTracks();
   } catch (error) {
     console.error('加载排行榜列表失败:', error);
   } finally {

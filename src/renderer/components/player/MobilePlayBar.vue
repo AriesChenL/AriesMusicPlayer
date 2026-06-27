@@ -176,9 +176,9 @@ watch(
           --n-rail-height: 3px;
           --n-rail-color: rgba(255, 255, 255, 0.15);
           --n-rail-color-dark: rgba(255, 255, 255, 0.15);
-          --n-fill-color: #e08a3c;
+          --n-fill-color: #307fb6;
           --n-handle-size: 0px; /* 隐藏滑块 */
-          --n-handle-color: #e08a3c;
+          --n-handle-color: #307fb6;
 
           &:hover {
             --n-handle-size: 10px; /* 鼠标悬停时显示滑块 */

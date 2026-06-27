@@ -407,7 +407,7 @@ watch(
 const { getLrcStyle: originalLrcStyle } = useLyricProgress();
 
 const getLrcStyle = (index: number) => {
-  const colors = { ...(textColors.value || getTextColors()), active: '#e08a3c' };
+  const colors = { ...(textColors.value || getTextColors()), active: '#5ca9e3' };
   const originalStyle = originalLrcStyle(index);
 
   if (index === nowIndex.value) {
@@ -438,7 +438,7 @@ const getLrcStyle = (index: number) => {
 
 // 逐字歌词样式函数
 const getWordStyle = (lineIndex: number, _wordIndex: number, word: any) => {
-  const colors = { ...(textColors.value || getTextColors()), active: '#e08a3c' };
+  const colors = { ...(textColors.value || getTextColors()), active: '#5ca9e3' };
   // 如果不是当前行，返回普通样式
   if (lineIndex !== nowIndex.value) {
     return {

@@ -542,7 +542,7 @@ defineExpose({
 }
 
 .toggle-switch:checked {
-  background: #e08a3c;
+  background: #307fb6;
 }
 
 .toggle-switch:checked::before {
@@ -581,7 +581,7 @@ defineExpose({
   appearance: none;
   width: 16px;
   height: 16px;
-  background: #e08a3c;
+  background: #307fb6;
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
@@ -590,7 +590,7 @@ defineExpose({
 .slider-emerald::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  background: #e08a3c;
+  background: #307fb6;
   border-radius: 50%;
   cursor: pointer;
   border: none;
@@ -674,7 +674,7 @@ defineExpose({
 }
 
 .radio-input:checked {
-  border-color: #e08a3c;
+  border-color: #307fb6;
   opacity: 1;
 }
 
@@ -683,7 +683,7 @@ defineExpose({
   position: absolute;
   width: 10px;
   height: 10px;
-  background: #e08a3c;
+  background: #307fb6;
   border-radius: 50%;
   left: 2px;
   top: 2px;
@@ -777,7 +777,7 @@ defineExpose({
 }
 
 .select-input:focus {
-  border-color: #e08a3c;
+  border-color: #307fb6;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 

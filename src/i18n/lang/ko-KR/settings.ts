@@ -290,7 +290,7 @@ export default {
     manualUpdate: '수동 업데이트',
     gotoGithub: 'Github로 이동',
     author: '작성자',
-    authorDesc: 'algerkong 별점🌟 부탁드려요',
+    authorDesc: 'lynn 별점🌟 부탁드려요',
     messages: {
       checkError: '업데이트 확인 실패, 나중에 다시 시도하세요'
     }
@@ -405,7 +405,7 @@ export default {
   translationEngine: '가사 번역 엔진',
   translationEngineOptions: {
     none: '닫기',
-    opencc: 'OpenCC 중국어 번체'
+    opencc: 'OpenCC 중국어 간체'
   },
   themeColor: {
     title: '가사 테마 색상',
@@ -426,7 +426,7 @@ export default {
       openColorPicker: '색상 선택기 열기',
       closeColorPicker: '색상 선택기 닫기'
     },
-    placeholder: '#1db954'
+    placeholder: '#5ca9e3'
   },
   shortcutSettings: {
     title: '단축키 설정',

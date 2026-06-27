@@ -289,7 +289,7 @@ const handleLoginError = (error: string) => {
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(34, 197, 94, 0.3);
+        box-shadow: 0 6px 12px rgba(48, 127, 182, 0.3);
       }
     }
   }

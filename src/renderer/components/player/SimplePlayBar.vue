@@ -311,8 +311,8 @@ onMounted(() => {
     --muted-color: rgba(0, 0, 0, 0.6);
     --track-color: rgba(0, 0, 0, 0.2);
     --track-color-hover: rgba(0, 0, 0, 0.4);
-    --fill-color: #e08a3c;
-    --fill-color-alt: #f4a85e;
+    --fill-color: #307fb6;
+    --fill-color-alt: #5ca9e3;
     --fill-color-transparent: rgba(224, 138, 60, 0.25);
     --fill-color-light: rgba(224, 138, 60, 0.5);
     --button-bg: rgba(0, 0, 0, 0.1);
@@ -324,8 +324,8 @@ onMounted(() => {
     --muted-color: rgba(255, 255, 255, 0.6);
     --track-color: rgba(255, 255, 255, 0.1);
     --track-color-hover: rgba(255, 255, 255, 0.2);
-    --fill-color: #f4a85e;
-    --fill-color-alt: #f4a85e;
+    --fill-color: #5ca9e3;
+    --fill-color-alt: #5ca9e3;
     --fill-color-transparent: rgba(244, 168, 94, 0.25);
     --fill-color-light: rgba(244, 168, 94, 0.5);
     --button-bg: rgba(255, 255, 255, 0.05);

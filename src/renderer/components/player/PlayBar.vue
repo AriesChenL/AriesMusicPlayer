@@ -135,24 +135,7 @@
         </template>
         {{ t('player.playBar.like') }}
       </n-tooltip>
-      <n-tooltip v-if="isElectron" class="music-lyric" trigger="hover" :z-index="9999999">
-        <template #trigger>
-          <i
-            class="iconfont ri-netease-cloud-music-line"
-            :class="{ 'text-primary': isLyricWindowOpen, 'disabled-icon': !playMusic?.id }"
-            @click="playMusic?.id && openLyricWindow()"
-          ></i>
-        </template>
-        {{ playMusic?.id ? t('player.playBar.lyric') : t('player.playBar.noSongPlaying') }}
-      </n-tooltip>
-      <n-tooltip v-if="playMusic?.id && isElectron" trigger="hover" :z-index="9999999">
-        <template #trigger>
-          <reparse-popover v-if="playMusic?.id" />
-        </template>
-        {{ t('player.playBar.reparse') }}
-      </n-tooltip>
-
-      <!-- 高级控制菜单按钮（整合了 EQ、定时关闭、播放速度） -->
+      <!-- 设计稿「设置齿轮」：整合 歌词、换源重解析、EQ、定时关闭、播放速度 -->
       <advanced-controls-popover />
 
       <n-tooltip trigger="hover" :z-index="9999999">
@@ -178,16 +161,7 @@ import { useI18n } from 'vue-i18n';
 
 import MusicFullWrapper from '@/components/lyric/MusicFullWrapper.vue';
 import AdvancedControlsPopover from '@/components/player/AdvancedControlsPopover.vue';
-import ReparsePopover from '@/components/player/ReparsePopover.vue';
-import {
-  allTime,
-  artistList,
-  isLyricWindowOpen,
-  nowTime,
-  openLyric,
-  playMusic,
-  textColors
-} from '@/hooks/MusicHook';
+import { allTime, artistList, nowTime, playMusic, textColors } from '@/hooks/MusicHook';
 import { useArtist } from '@/hooks/useArtist';
 import { useFavorite } from '@/hooks/useFavorite';
 import { usePlaybackControl } from '@/hooks/usePlaybackControl';
@@ -196,7 +170,7 @@ import { useVolumeControl } from '@/hooks/useVolumeControl';
 import { audioService } from '@/services/audioService';
 import { usePlayerStore } from '@/store/modules/player';
 import { useSettingsStore } from '@/store/modules/settings';
-import { getImgUrl, isElectron, isMobile, secondToMinute, setAnimationClass } from '@/utils';
+import { getImgUrl, isMobile, secondToMinute, setAnimationClass } from '@/utils';
 
 const playerStore = usePlayerStore();
 const settingsStore = useSettingsStore();
@@ -288,10 +262,6 @@ const setMusicFull = () => {
   if (musicFullVisible.value) {
     settingsStore.showArtistDrawer = false;
   }
-};
-
-const openLyricWindow = () => {
-  openLyric();
 };
 
 const { navigateToArtist } = useArtist();

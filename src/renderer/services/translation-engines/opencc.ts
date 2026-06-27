@@ -10,7 +10,12 @@ export async function init(): Promise<void> {
     throw new Error('opencc-rust module missing expected exports');
   }
   await mod.initOpenccRust();
-  _converter = mod.getConverter();
+  // t2s：繁体 → 简体（歌词统一显示为简体中文）
+  try {
+    _converter = mod.getConverter('t2s');
+  } catch {
+    _converter = mod.getConverter();
+  }
   _inited = true;
 }
 

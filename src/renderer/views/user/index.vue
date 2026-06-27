@@ -466,6 +466,9 @@ const currentLoginType = computed(() => userStore.loginType);
 <style lang="scss" scoped>
 .user-page {
   @apply flex h-full;
+  /* 与首页/排行等标准页保持一致的左右内边距（PC 端约 2rem） */
+  padding-left: var(--page-pl);
+  padding-right: var(--page-pr);
   .left {
     max-width: 600px;
     @apply flex-1 rounded-2xl overflow-hidden relative bg-no-repeat h-full;

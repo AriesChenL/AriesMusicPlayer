@@ -290,7 +290,7 @@ export default {
     manualUpdate: 'Manual Update',
     gotoGithub: 'Go to Github',
     author: 'Author',
-    authorDesc: 'algerkong Give a star🌟',
+    authorDesc: 'lynn Give a star🌟',
     messages: {
       checkError: 'Failed to check for updates, please try again later'
     }
@@ -405,7 +405,7 @@ export default {
   translationEngine: 'Lyric Translation Engine',
   translationEngineOptions: {
     none: 'Off',
-    opencc: 'OpenCC Traditionalize'
+    opencc: 'OpenCC Simplify'
   },
   themeColor: {
     title: 'Lyric Theme Color',
@@ -426,7 +426,7 @@ export default {
       openColorPicker: 'Open Color Picker',
       closeColorPicker: 'Close Color Picker'
     },
-    placeholder: '#1db954'
+    placeholder: '#5ca9e3'
   },
   shortcutSettings: {
     title: 'Shortcut Settings',

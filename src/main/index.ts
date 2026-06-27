@@ -138,7 +138,7 @@ if (!isSingleInstance) {
   // 应用程序准备就绪时的处理
   app.whenReady().then(() => {
     // 设置应用ID
-    electronApp.setAppUserModelId('com.alger.music');
+    electronApp.setAppUserModelId('com.lynn.ariesmusic');
 
     // 监听窗口创建事件
     app.on('browser-window-created', (_, window) => {

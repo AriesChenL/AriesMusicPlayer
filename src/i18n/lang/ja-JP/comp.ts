@@ -95,7 +95,6 @@ export default {
     wechatQR: 'WeChat QRコード',
     coffeeDesc: '一杯のコーヒー、一つのサポート',
     coffeeDescLinkText: 'もっと見る',
-    groupText: '微信公众号：AlgerMusic',
     messages: {
       copySuccess: 'クリップボードにコピーしました'
     },

@@ -11,6 +11,39 @@ const layoutRouter = [
     component: () => import('@/views/home/index.vue')
   },
   {
+    path: '/discover',
+    name: 'discover',
+    meta: {
+      title: 'comp.discover',
+      icon: 'ri-compass-3-line',
+      keepAlive: true,
+      isMobile: true
+    },
+    component: () => import('@/views/discover/index.vue')
+  },
+  {
+    path: '/video',
+    name: 'video',
+    meta: {
+      title: 'comp.video',
+      icon: 'icon-recordfill',
+      keepAlive: true,
+      isMobile: true
+    },
+    component: () => import('@/views/video/index.vue')
+  },
+  {
+    path: '/vip',
+    name: 'vip',
+    meta: {
+      title: 'comp.vip',
+      icon: 'ri-vip-crown-line',
+      keepAlive: true,
+      isMobile: true
+    },
+    component: () => import('@/views/vip/index.vue')
+  },
+  {
     path: '/search',
     name: 'search',
     meta: {

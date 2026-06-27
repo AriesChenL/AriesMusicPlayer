@@ -88,7 +88,6 @@ export default {
     wechatQR: '微信收款碼',
     coffeeDesc: '一杯咖啡，一份支持',
     coffeeDescLinkText: '查看更多',
-    groupText: '微信公众号：AlgerMusic',
     messages: {
       copySuccess: '已複製到剪貼簿'
     },

@@ -1,7 +1,7 @@
 <template>
   <div id="title-bar" class="mr-titlebar" :class="{ 'is-mac': isMac }" @mousedown="drag">
     <!-- 左侧：标题（macOS 让位给原生交通灯） -->
-    <div v-if="!isMac" id="title" class="mr-titlebar-title">Alger Music</div>
+    <div v-if="!isMac" id="title" class="mr-titlebar-title">AriesMusic</div>
     <div v-else class="mr-titlebar-spacer"></div>
     <div class="mr-titlebar-flex"></div>
     <div id="buttons" class="mr-titlebar-buttons">
@@ -139,7 +139,7 @@ const rememberChoice = ref(false);
 
 const openDownloadPage = () => {
   if (!isElectron) {
-    window.open('http://donate.alger.fun/download', '_blank');
+    window.open('https://github.com/AriesChenL/AlgerMusicPlayer/releases', '_blank');
   }
 };
 

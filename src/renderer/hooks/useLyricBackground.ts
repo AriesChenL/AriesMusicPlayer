@@ -15,7 +15,7 @@ type UseLyricBackgroundOptions = {
 
 const DEFAULT_BG_COLOR = 'rgba(25, 25, 25, 1)';
 // 设计稿固定琥珀强调色（当前行高亮）
-const FIXED_LYRIC_ACTIVE = '#e08a3c';
+const FIXED_LYRIC_ACTIVE = '#5ca9e3';
 
 export function useLyricBackground(options: UseLyricBackgroundOptions = {}) {
   const currentBackground = ref('');

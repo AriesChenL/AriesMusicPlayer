@@ -1,10 +1,10 @@
 {
-  "name": "AlgerMusicPlayer",
+  "name": "AriesMusic",
   "version": "5.1.0",
-  "description": "Alger Music Player",
-  "author": "Alger <algerkc@qq.com>",
+  "description": "AriesMusic",
+  "author": "lynn <aries3153764534@gmail.com>",
   "main": "./out/main/index.js",
-  "homepage": "https://github.com/algerkong/AlgerMusicPlayer",
+  "homepage": "https://github.com/AriesChenL/AlgerMusicPlayer",
   "scripts": {
     "prepare": "husky",
     "format": "prettier --write ./src",
@@ -122,12 +122,12 @@
     "vue-tsc": "^2.2.12"
   },
   "build": {
-    "appId": "com.alger.music",
-    "productName": "AlgerMusicPlayer",
+    "appId": "com.lynn.ariesmusic",
+    "productName": "AriesMusic",
     "publish": [
       {
         "provider": "github",
-        "owner": "algerkong",
+        "owner": "AriesChenL",
         "repo": "AlgerMusicPlayer"
       }
     ],
@@ -161,7 +161,7 @@
       "identity": null,
       "type": "distribution",
       "binaries": [
-        "Contents/MacOS/AlgerMusicPlayer"
+        "Contents/MacOS/AriesMusic"
       ]
     },
     "win": {
@@ -206,7 +206,7 @@
       ],
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
       "category": "Audio",
-      "maintainer": "Alger <algerkc@qq.com>"
+      "maintainer": "lynn <aries3153764534@gmail.com>"
     },
     "nsis": {
       "oneClick": false,
@@ -215,10 +215,10 @@
       "uninstallerIcon": "resources/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "AlgerMusicPlayer",
+      "shortcutName": "AriesMusic",
       "include": "build/installer.nsh",
       "deleteAppDataOnUninstall": true,
-      "uninstallDisplayName": "AlgerMusicPlayer"
+      "uninstallDisplayName": "AriesMusic"
     }
   },
   "pnpm": {

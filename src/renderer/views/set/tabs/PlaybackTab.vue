@@ -58,11 +58,96 @@
       </setting-item>
 
       <setting-item
+        :title="t('settings.playback.trialFallback')"
+        :description="t('settings.playback.trialFallbackDesc')"
+      >
+        <n-switch v-model:value="setData.enableTrialFallback">
+          <template #checked>{{ t('common.on') }}</template>
+          <template #unchecked>{{ t('common.off') }}</template>
+        </n-switch>
+      </setting-item>
+
+      <setting-item
         v-if="isElectron"
         :title="t('settings.playback.audioDevice')"
         :description="t('settings.playback.audioDeviceDesc')"
       >
         <audio-device-settings />
+      </setting-item>
+    </setting-section>
+
+    <setting-section :title="t('settings.sections.spectrum')">
+      <setting-item
+        :title="t('settings.spectrum.enabled')"
+        :description="t('settings.spectrum.enabledDesc')"
+      >
+        <n-switch v-model:value="setData.spectrumEnabled">
+          <template #checked>{{ t('common.on') }}</template>
+          <template #unchecked>{{ t('common.off') }}</template>
+        </n-switch>
+      </setting-item>
+
+      <setting-item
+        :title="t('settings.spectrum.attack')"
+        :description="t('settings.spectrum.attackDesc')"
+      >
+        <div class="flex items-center gap-3 w-56 max-md:w-full">
+          <n-slider
+            v-model:value="setData.spectrumAttack"
+            :min="0.1"
+            :max="1"
+            :step="0.05"
+            :disabled="setData.spectrumEnabled === false"
+          />
+          <span class="w-10 text-right text-sm text-gray-400 tabular-nums">
+            {{ Number(setData.spectrumAttack ?? 0.55).toFixed(2) }}
+          </span>
+        </div>
+      </setting-item>
+
+      <setting-item
+        :title="t('settings.spectrum.release')"
+        :description="t('settings.spectrum.releaseDesc')"
+      >
+        <div class="flex items-center gap-3 w-56 max-md:w-full">
+          <n-slider
+            v-model:value="setData.spectrumRelease"
+            :min="0.02"
+            :max="0.5"
+            :step="0.02"
+            :disabled="setData.spectrumEnabled === false"
+          />
+          <span class="w-10 text-right text-sm text-gray-400 tabular-nums">
+            {{ Number(setData.spectrumRelease ?? 0.12).toFixed(2) }}
+          </span>
+        </div>
+      </setting-item>
+
+      <setting-item
+        :title="t('settings.spectrum.bassTilt')"
+        :description="t('settings.spectrum.bassTiltDesc')"
+      >
+        <div class="flex items-center gap-3 w-56 max-md:w-full">
+          <n-slider
+            v-model:value="setData.spectrumBassTilt"
+            :min="0"
+            :max="0.6"
+            :step="0.05"
+            :disabled="setData.spectrumEnabled === false"
+          />
+          <span class="w-10 text-right text-sm text-gray-400 tabular-nums">
+            {{ Number(setData.spectrumBassTilt ?? 0.3).toFixed(2) }}
+          </span>
+        </div>
+      </setting-item>
+
+      <setting-item
+        :title="t('settings.spectrum.reset')"
+        :description="t('settings.spectrum.resetDesc')"
+      >
+        <s-btn :disabled="setData.spectrumEnabled === false" @click="resetSpectrum">
+          {{ t('settings.spectrum.resetBtn') }}
+        </s-btn>
       </setting-item>
     </setting-section>
 
@@ -122,6 +207,16 @@ const setData = inject(SETTINGS_DATA_KEY)!;
 const platform = window.electron ? window.electron.ipcRenderer.sendSync('get-platform') : 'web';
 
 const showMusicSourcesModal = ref(false);
+
+// 频谱动效参数恢复默认值
+const resetSpectrum = () => {
+  setData.value = {
+    ...setData.value,
+    spectrumAttack: 0.55,
+    spectrumRelease: 0.12,
+    spectrumBassTilt: 0.3
+  };
+};
 
 const qualityOptions = computed(() => [
   { label: t('settings.playback.qualityOptions.standard'), value: 'standard' },

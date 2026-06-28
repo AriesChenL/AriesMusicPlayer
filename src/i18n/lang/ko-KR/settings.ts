@@ -10,7 +10,22 @@ export default {
     network: '네트워크 설정',
     system: '시스템 관리',
     donation: '후원 지원',
-    about: '정보'
+    about: '정보',
+    spectrum: '스펙트럼 효과'
+  },
+  spectrum: {
+    enabled: '스펙트럼 효과',
+    enabledDesc:
+      '재생 바 배경이 음악 주파수에 따라 움직입니다. 끄면 가벼운 애니메이션을 사용합니다',
+    attack: '상승 속도',
+    attackDesc: '값이 클수록 막대가 더 빠르게 정점까지 튀어 비트의 타격감이 커집니다',
+    release: '하강 속도',
+    releaseDesc: '값이 작을수록 더 천천히 안정적으로 내려가 깜빡임을 줄입니다',
+    bassTilt: '저음 강조',
+    bassTiltDesc: '값이 클수록 킥/베이스 등 저음의 움직임이 두드러집니다',
+    reset: '기본값 복원',
+    resetDesc: '상승, 하강, 저음 강조를 기본값으로 되돌립니다',
+    resetBtn: '초기화'
   },
   basic: {
     themeMode: '테마 모드',
@@ -97,6 +112,9 @@ export default {
     gdmusicInfo: 'GD 뮤직은 여러 플랫폼 음원을 자동으로 해석하고 최적의 결과를 자동 선택합니다',
     autoPlay: '자동 재생',
     autoPlayDesc: '앱을 다시 열 때 자동으로 재생을 계속할지 여부',
+    trialFallback: '미리듣기 대체',
+    trialFallbackDesc:
+      'VIP/무판권 곡의 파싱에 실패하면 공식 미리듣기 클립으로 재생합니다(무음보다 나음)',
     audioDevice: '오디오 출력 장치',
     audioDeviceDesc: '스피커, 헤드폰 또는 블루투스 장치와 같은 오디오 출력 장치 선택',
     testAudio: '테스트',

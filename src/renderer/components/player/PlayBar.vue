@@ -211,6 +211,12 @@ let eqRafId = 0;
 let eqPeak = 0.2; // 自适应峰值（带衰减），用于动态归一化，放大整体起伏
 // 每个“频率档位”对应的 bin 区间（对数分布），按数据长度懒构建
 let eqBinRanges: Array<[number, number]> | null = null;
+// 每根条的平滑显示值，用于非对称缓动（冲顶快、回落慢，模拟专业频谱的质感）
+let eqSmooth: Float32Array | null = null;
+// 缓动/加权参数从设置读取，此处为兜底默认值
+const EQ_ATTACK_DEFAULT = 0.55; // 上升跟随系数：越大越快冲顶，体现鼓点冲击
+const EQ_RELEASE_DEFAULT = 0.12; // 下降跟随系数：越小回落越慢越稳，避免抖动
+const EQ_BASS_TILT_DEFAULT = 0.3; // 低频加权强度：0=不加权，越大底鼓/贝斯越突出
 
 const buildBinRanges = (bins: number): Array<[number, number]> => {
   const minBin = 1;
@@ -234,6 +240,12 @@ const renderSpectrum = () => {
   }
   useRealSpectrum.value = true;
 
+  // 实时读取用户设置（带兜底默认值），改动即时生效
+  const sd = settingsStore.setData || {};
+  const attack = sd.spectrumAttack ?? EQ_ATTACK_DEFAULT;
+  const release = sd.spectrumRelease ?? EQ_RELEASE_DEFAULT;
+  const bassTilt = sd.spectrumBassTilt ?? EQ_BASS_TILT_DEFAULT;
+
   const els = eqBgRef.value?.children;
   if (els && els.length) {
     if (!eqBinRanges) eqBinRanges = buildBinRanges(data.length);
@@ -245,7 +257,10 @@ const renderSpectrum = () => {
       const [s, e] = eqBinRanges[l];
       let sum = 0;
       for (let k = s; k < e; k++) sum += data[k];
-      const v = sum / (e - s) / 255; // 0..1
+      let v = sum / (e - s) / 255; // 0..1
+      // 低频加权（bass tilt）：l=0 为低频。低频 ×(1+tilt) → 高频 ×(1-tilt)，突出底鼓/贝斯的节拍感
+      const t = EQ_HALF > 1 ? l / (EQ_HALF - 1) : 0; // 0=低频, 1=高频
+      v *= 1 + bassTilt * (1 - 2 * t);
       levels[l] = v;
       if (v > frameMax) frameMax = v;
     }
@@ -255,12 +270,21 @@ const renderSpectrum = () => {
     if (eqPeak < 0.08) eqPeak = 0.08; // 静音时设下限，避免放大噪声
     const inv = 1 / eqPeak;
 
+    if (!eqSmooth || eqSmooth.length !== els.length) eqSmooth = new Float32Array(els.length);
+
     // 镜像映射到 56 根条：中间为低频，两侧为高频
     for (let b = 0; b < els.length; b++) {
       const level = b < EQ_HALF ? EQ_HALF - 1 - b : b - EQ_HALF;
-      let v = (levels[level] ?? 0) * inv; // 归一化到 0..1
-      v = Math.pow(Math.min(1, v), 0.6); // 抬升中低段，整体更饱满
-      const scale = 0.06 + v * 0.94;
+      let target = (levels[level] ?? 0) * inv; // 归一化到 0..1
+      target = Math.pow(Math.min(1, target), 0.6); // 抬升中低段，整体更饱满
+
+      // 非对称缓动：目标更高时快速冲顶，更低时缓慢回落 → 鼓点有冲击、回落更稳
+      const prev = eqSmooth[b];
+      const k = target > prev ? attack : release;
+      const cur = prev + (target - prev) * k;
+      eqSmooth[b] = cur;
+
+      const scale = 0.06 + cur * 0.94;
       (els[b] as HTMLElement).style.transform = `scaleY(${scale.toFixed(3)})`;
     }
   }
@@ -269,6 +293,11 @@ const renderSpectrum = () => {
 
 const startSpectrum = () => {
   if (eqRafId) return;
+  // 用户关闭了频谱动效 → 回退 CSS 动效（一排竖条按伪随机节奏起伏）
+  if (settingsStore.setData?.spectrumEnabled === false) {
+    useRealSpectrum.value = false;
+    return;
+  }
   eqRafId = requestAnimationFrame(renderSpectrum);
 };
 
@@ -284,13 +313,15 @@ const stopSpectrum = () => {
       (els[b] as HTMLElement).style.transform = 'scaleY(0.1)';
     }
   }
+  eqSmooth = null; // 重置缓动状态，下次播放从静止重新起跳
 };
 
 watch(
-  play,
-  (isPlaying) => {
+  [play, () => settingsStore.setData?.spectrumEnabled],
+  ([isPlaying]) => {
+    // 先停后启，确保开关切换时立即在「实时频谱 / CSS 回退」之间正确切换
+    stopSpectrum();
     if (isPlaying) startSpectrum();
-    else stopSpectrum();
   },
   { immediate: true }
 );
@@ -442,7 +473,8 @@ const openPlayListDrawer = () => {
       background: linear-gradient(to top, var(--accent), var(--accent2));
       transform-origin: bottom;
       transform: scaleY(0.16);
-      transition: transform 0.08s linear;
+      /* JS 已做非对称缓动，这里仅做帧间微补间，避免双重平滑导致拖糊 */
+      transition: transform 0.045s linear;
     }
 
     &.is-playing .eq-bar {

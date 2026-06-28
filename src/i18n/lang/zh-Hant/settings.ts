@@ -10,7 +10,21 @@ export default {
     network: '網路設定',
     system: '系統管理',
     donation: '捐贈支持',
-    about: '關於'
+    about: '關於',
+    spectrum: '頻譜動效'
+  },
+  spectrum: {
+    enabled: '頻譜動效',
+    enabledDesc: '播放列背景跟隨音樂頻率跳動；關閉則使用輕量動畫',
+    attack: '上升速度',
+    attackDesc: '數值越大，跳動衝頂越快、鼓點越有衝擊力',
+    release: '回落速度',
+    releaseDesc: '數值越小，回落越慢越穩，避免畫面抖動',
+    bassTilt: '低頻加權',
+    bassTiltDesc: '數值越大，大鼓/貝斯等低頻跳動越突出',
+    reset: '恢復預設',
+    resetDesc: '將上升、回落、低頻加權恢復為預設值',
+    resetBtn: '恢復預設'
   },
   basic: {
     themeMode: '主題模式',
@@ -94,6 +108,8 @@ export default {
     gdmusicInfo: 'GD音樂台可自動解析多個平台音源，自動選擇最佳結果',
     autoPlay: '自動播放',
     autoPlayDesc: '重新開啟應用程式時是否自動繼續播放',
+    trialFallback: '試聽回退',
+    trialFallbackDesc: '當 VIP/無版權歌曲解析失敗時，回退播放官方試聽片段（優於完全無聲）',
     audioDevice: '音訊輸出裝置',
     audioDeviceDesc: '選擇音訊輸出裝置，如揚聲器、耳機或藍牙裝置',
     testAudio: '測試',

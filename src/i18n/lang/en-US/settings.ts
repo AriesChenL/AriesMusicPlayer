@@ -10,7 +10,22 @@ export default {
     network: 'Network Settings',
     system: 'System Management',
     donation: 'Donation',
-    about: 'About'
+    about: 'About',
+    spectrum: 'Spectrum Animation'
+  },
+  spectrum: {
+    enabled: 'Spectrum Animation',
+    enabledDesc:
+      'Player bar background reacts to the music frequency; off uses a lightweight animation',
+    attack: 'Attack Speed',
+    attackDesc: 'Higher means bars jump to the peak faster, giving beats more punch',
+    release: 'Release Speed',
+    releaseDesc: 'Lower means bars fall back slower and steadier, avoiding flicker',
+    bassTilt: 'Bass Emphasis',
+    bassTiltDesc: 'Higher makes low frequencies (kick/bass) stand out more',
+    reset: 'Reset to Default',
+    resetDesc: 'Restore attack, release and bass emphasis to defaults',
+    resetBtn: 'Reset'
   },
   basic: {
     themeMode: 'Theme Mode',
@@ -98,6 +113,9 @@ export default {
       'GD Music Station intelligently resolves music from multiple platforms automatically',
     autoPlay: 'Auto Play',
     autoPlayDesc: 'Auto resume playback when reopening the app',
+    trialFallback: 'Trial Fallback',
+    trialFallbackDesc:
+      'When a VIP/unlicensed track fails to resolve, fall back to the official preview clip (better than silence)',
     audioDevice: 'Audio Output Device',
     audioDeviceDesc: 'Select audio output device such as speakers, headphones or Bluetooth devices',
     testAudio: 'Test',

@@ -13,7 +13,7 @@
           <div
             v-for="section in navSections"
             :key="section.id"
-            class="set-nav-chip py-1.5 px-4 mr-3 inline-block rounded-full cursor-pointer transition-all duration-300 text-sm font-medium select-none"
+            class="set-nav-chip py-1.5 px-4 mr-3 inline-block rounded-full cursor-pointer transition-colors duration-200 text-sm font-medium select-none"
             :class="currentSection === section.id ? 'is-active' : ''"
             @click="currentSection = section.id"
           >
@@ -187,7 +187,6 @@ onMounted(() => {
   background: var(--accent);
   color: var(--accentText);
   box-shadow: 0 8px 16px -4px var(--accentLine);
-  transform: scale(1.05);
 }
 
 .animate-fade-in {

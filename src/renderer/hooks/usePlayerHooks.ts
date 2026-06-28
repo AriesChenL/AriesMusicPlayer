@@ -179,7 +179,16 @@ export const getSongUrl = async (
           throw new Error('Request cancelled');
         }
         if (isDownloaded) return res?.data?.data as any;
-        const parsedUrl = res?.data?.data?.url || null;
+        let parsedUrl = res?.data?.data?.url || null;
+
+        // 备用解析失败且官方返回了试听片段：回退到试听版（优于完全无声）
+        // 仅当 isTrial（songDetail.url 为试听片段）且用户未关闭该回退时生效
+        const allowTrialFallback = settingsStore.setData.enableTrialFallback !== false;
+        if (!parsedUrl && isTrial && songDetail.url && allowTrialFallback) {
+          console.log('备用解析失败，回退到官方试听片段');
+          parsedUrl = songDetail.url;
+        }
+
         return await resolveCachedPlaybackUrl(parsedUrl, songData);
       }
 

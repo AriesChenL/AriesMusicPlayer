@@ -10,7 +10,22 @@ export default {
     network: 'ネットワーク設定',
     system: 'システム管理',
     donation: '寄付サポート',
-    about: 'について'
+    about: 'について',
+    spectrum: 'スペクトラム演出'
+  },
+  spectrum: {
+    enabled: 'スペクトラム演出',
+    enabledDesc:
+      '再生バーの背景が音楽の周波数に合わせて動きます。オフにすると軽量アニメーションになります',
+    attack: '立ち上がり速度',
+    attackDesc: '大きいほどピークへ速く跳ね上がり、ビートの迫力が増します',
+    release: '減衰速度',
+    releaseDesc: '小さいほどゆっくり安定して下がり、ちらつきを抑えます',
+    bassTilt: '低音強調',
+    bassTiltDesc: '大きいほどキック／ベースなど低音の動きが際立ちます',
+    reset: 'デフォルトに戻す',
+    resetDesc: '立ち上がり・減衰・低音強調を既定値に戻します',
+    resetBtn: 'リセット'
   },
   basic: {
     themeMode: 'テーマモード',
@@ -97,6 +112,9 @@ export default {
     gdmusicInfo: 'GD音楽台は複数のプラットフォーム音源を自動解析し、最適な結果を自動選択できます',
     autoPlay: '自動再生',
     autoPlayDesc: 'アプリを再起動した際に自動的に再生を継続するかどうか',
+    trialFallback: '試聴フォールバック',
+    trialFallbackDesc:
+      'VIP/無版権の楽曲の解析に失敗した場合、公式の試聴クリップで再生します（無音より良い）',
     audioDevice: 'オーディオ出力デバイス',
     audioDeviceDesc: 'スピーカー、ヘッドホン、Bluetoothデバイスなどの出力先を選択',
     testAudio: 'テスト',

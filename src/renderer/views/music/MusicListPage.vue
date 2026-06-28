@@ -5,7 +5,7 @@
         <!-- Hero Section 和 Action Bar -->
         <n-spin :show="loading">
           <!-- Hero Section -->
-          <section class="hero-section relative overflow-hidden rounded-tl-2xl">
+          <section class="hero-section relative overflow-hidden">
             <!-- Background Image with Blur -->
             <div class="hero-bg absolute inset-0 -top-20">
               <div
@@ -15,7 +15,10 @@
                 }"
               ></div>
               <div
-                class="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white dark:via-black/80 dark:to-black"
+                class="absolute inset-0"
+                style="
+                  background-image: linear-gradient(to bottom, transparent 0%, var(--win) 100%);
+                "
               ></div>
             </div>
 
@@ -115,7 +118,8 @@
         <!-- Action Bar (Sticky) -->
         <section
           v-if="songList.length > 0"
-          class="action-bar sticky top-0 z-20 page-padding-x py-3 md:py-4 bg-white/80 dark:bg-dark/80 backdrop-blur-xl border-b border-neutral-100 dark:border-neutral-800/50"
+          class="action-bar sticky top-0 z-20 page-padding-x py-3 md:py-4 border-b border-neutral-100 dark:border-neutral-800/50"
+          style="background: var(--win)"
         >
           <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -135,7 +139,7 @@
                 :class="
                   isCollected
                     ? 'bg-neutral-100 dark:bg-neutral-800 text-red-500 border-neutral-200 dark:border-neutral-700'
-                    : 'bg-neutral-50 dark:bg-dark-100 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800'
+                    : 'bg-[var(--chip)] text-[var(--chipText)] border-transparent hover:bg-[var(--accentSoft)] hover:text-[var(--accent)]'
                 "
                 @click="toggleCollect"
               >
@@ -156,7 +160,7 @@
 
               <button
                 v-if="!isSelecting && isElectron"
-                class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-dark-100 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-[var(--chip)] text-[var(--chipText)] hover:bg-[var(--accentSoft)] hover:text-[var(--accent)] transition-all"
                 @click="startSelect"
               >
                 <i class="ri-checkbox-multiple-line text-lg" />
@@ -208,7 +212,7 @@
                   round
                   clearable
                   size="small"
-                  class="w-48 focus:w-64 transition-all duration-300 !bg-neutral-100 dark:!bg-neutral-900 border-none"
+                  class="w-48 focus:w-64 transition-all duration-300 !bg-[var(--chip)] border-none"
                 >
                   <template #prefix>
                     <i class="ri-search-line text-neutral-400"></i>
@@ -220,7 +224,7 @@
               <n-tooltip v-if="currentPlayingIndex >= 0" trigger="hover">
                 <template #trigger>
                   <button
-                    class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-dark-100 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                    class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-[var(--chip)] text-[var(--chipText)] hover:bg-[var(--accentSoft)] hover:text-[var(--accent)] transition-all"
                     @click="scrollToCurrentSong"
                   >
                     <i class="ri-focus-3-line text-lg" />
@@ -233,7 +237,7 @@
               <n-tooltip v-if="!isMobile" trigger="hover">
                 <template #trigger>
                   <button
-                    class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-dark-100 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                    class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-[var(--chip)] text-[var(--chipText)] hover:bg-[var(--accentSoft)] hover:text-[var(--accent)] transition-all"
                     @click="toggleLayout"
                   >
                     <i
@@ -253,7 +257,7 @@
               <n-tooltip trigger="hover">
                 <template #trigger>
                   <button
-                    class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-dark-100 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                    class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-[var(--chip)] text-[var(--chipText)] hover:bg-[var(--accentSoft)] hover:text-[var(--accent)] transition-all"
                     @click="scrollToTop"
                   >
                     <i class="ri-arrow-up-line text-lg" />
@@ -364,9 +368,7 @@ const playHistoryStore = usePlayHistoryStore();
 
 const loading = ref(false);
 const isPlaying = computed(() => !!playerStore.playMusicUrl);
-const contentPaddingBottom = computed(() =>
-  isPlaying.value && !isMobile.value ? '220px' : '80px'
-);
+const contentPaddingBottom = computed(() => (isPlaying.value && !isMobile.value ? '80px' : '12px'));
 
 const fetchData = async () => {
   const id = route.params.id;

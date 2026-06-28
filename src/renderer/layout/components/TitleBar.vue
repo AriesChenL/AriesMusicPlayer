@@ -1,8 +1,12 @@
 <template>
-  <div id="title-bar" class="mr-titlebar" :class="{ 'is-mac': isMac }" @mousedown="drag">
-    <!-- 左侧：标题（macOS 让位给原生交通灯） -->
-    <div v-if="!isMac" id="title" class="mr-titlebar-title">AriesMusic</div>
-    <div v-else class="mr-titlebar-spacer"></div>
+  <div
+    id="title-bar"
+    class="mr-titlebar"
+    :class="{ 'is-mac': isMac, 'is-blur': !isWindowFocused }"
+    @mousedown="drag"
+  >
+    <!-- 左侧：产品名（macOS 下位于原生交通灯右侧，由 .is-mac 的 padding-left 让位） -->
+    <div id="title" class="mr-titlebar-title">Aries Music</div>
     <div class="mr-titlebar-flex"></div>
     <div id="buttons" class="mr-titlebar-buttons">
       <n-button
@@ -122,13 +126,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useSettingsStore } from '@/store/modules/settings';
 import { isElectron } from '@/utils';
 
 const { t } = useI18n();
+
+// 窗口失焦时，品牌名与 mini 按钮跟随原生交通灯一起变灰（但保持可见）
+const isWindowFocused = ref(true);
+const handleWindowFocus = () => {
+  isWindowFocused.value = true;
+};
+const handleWindowBlur = () => {
+  isWindowFocused.value = false;
+};
+
+onMounted(() => {
+  isWindowFocused.value = document.hasFocus();
+  window.addEventListener('focus', handleWindowFocus);
+  window.addEventListener('blur', handleWindowBlur);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('focus', handleWindowFocus);
+  window.removeEventListener('blur', handleWindowBlur);
+});
 
 // macOS 使用原生交通灯按钮，隐藏自绘的最小化/关闭按钮与标题文字
 const isMac = isElectron && window.electron.ipcRenderer.sendSync('get-platform') === 'darwin';
@@ -223,10 +247,13 @@ const drag = (event: MouseEvent) => {
   font-weight: 600;
   color: var(--text2);
   letter-spacing: 0.3px;
+  transition: opacity 0.2s ease;
 }
 
-.mr-titlebar-spacer {
-  width: 1px;
+/* 失焦时：品牌名与按钮变灰（与原生交通灯一致），但仍可见 */
+.mr-titlebar.is-blur .mr-titlebar-title,
+.mr-titlebar.is-blur .mr-titlebar-buttons {
+  opacity: 0.45;
 }
 
 .mr-titlebar-flex {
@@ -238,6 +265,7 @@ const drag = (event: MouseEvent) => {
   align-items: center;
   gap: 6px;
   -webkit-app-region: no-drag;
+  transition: opacity 0.2s ease;
 }
 
 .mr-titlebar-btn {

@@ -13,12 +13,8 @@
           <div
             v-for="section in navSections"
             :key="section.id"
-            class="py-1.5 px-4 mr-3 inline-block rounded-full cursor-pointer transition-all duration-300 text-sm font-medium select-none"
-            :class="
-              currentSection === section.id
-                ? 'bg-primary text-white shadow-lg shadow-primary/25 scale-105'
-                : 'bg-gray-100 dark:bg-dark-100 text-neutral-600 dark:text-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white'
-            "
+            class="set-nav-chip py-1.5 px-4 mr-3 inline-block rounded-full cursor-pointer transition-all duration-300 text-sm font-medium select-none"
+            :class="currentSection === section.id ? 'is-active' : ''"
             @click="currentSection = section.id"
           >
             {{ section.title }}
@@ -29,7 +25,7 @@
 
     <!-- 内容区域 -->
     <n-scrollbar class="flex-1">
-      <div class="w-full mx-auto pb-32 pt-6 page-padding">
+      <div class="w-full mx-auto pb-2 pt-6 page-padding">
         <div v-show="currentSection === 'basic'" class="animate-fade-in">
           <basic-tab />
         </div>
@@ -54,8 +50,7 @@
           <about-tab />
         </div>
 
-        <div class="h-20"></div>
-        <play-bottom />
+        <play-bottom height="78px" />
       </div>
     </n-scrollbar>
   </div>
@@ -177,6 +172,22 @@ onMounted(() => {
 <style scoped>
 :deep(.n-select .n-base-selection) {
   border-radius: 10px;
+}
+
+/* 标签配色与「发现」页保持一致 */
+.set-nav-chip {
+  background: var(--chip);
+  color: var(--chipText);
+}
+.set-nav-chip:hover {
+  background: var(--accentSoft);
+  color: var(--accent);
+}
+.set-nav-chip.is-active {
+  background: var(--accent);
+  color: var(--accentText);
+  box-shadow: 0 8px 16px -4px var(--accentLine);
+  transform: scale(1.05);
 }
 
 .animate-fade-in {

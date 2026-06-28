@@ -10,6 +10,8 @@ class AudioService {
   private sourceNode: MediaElementAudioSourceNode | null = null;
   private filters: BiquadFilterNode[] = [];
   private gainNode: GainNode | null = null;
+  private analyser: AnalyserNode | null = null;
+  private freqData: Uint8Array<ArrayBuffer> | null = null;
   private bypass = false;
 
   private playbackRate = 1.0;
@@ -228,6 +230,14 @@ class AudioService {
       this.sourceNode = this.context.createMediaElementSource(this.audio);
       this.gainNode = this.context.createGain();
 
+      // 频谱分析器（被动 tap，仅读取数据，不参与输出）
+      this.analyser = this.context.createAnalyser();
+      this.analyser.fftSize = 256;
+      this.analyser.smoothingTimeConstant = 0.7; // 稍低 → 反应更灵敏、起伏更大
+      this.analyser.minDecibels = -85;
+      this.analyser.maxDecibels = -20; // 抬高上限，避免响段饱和钉死在顶部
+      this.freqData = new Uint8Array(this.analyser.frequencyBinCount);
+
       // Create 10-band filter chain
       const savedSettings = this.loadEQSettings();
       this.filters = this.frequencies.map((freq) => {
@@ -299,6 +309,11 @@ class AudioService {
         this.filters[this.filters.length - 1].connect(this.gainNode);
         this.gainNode.connect(this.context.destination);
       }
+
+      // 频谱分析器从 gainNode 分流（gainNode.disconnect() 会断开它，故每次重连）
+      if (this.analyser) {
+        this.gainNode.connect(this.analyser);
+      }
     } catch (error) {
       console.error('Error applying EQ state, attempting fallback:', error);
       try {
@@ -314,6 +329,23 @@ class AudioService {
 
   public isEQEnabled(): boolean {
     return !this.bypass;
+  }
+
+  /**
+   * 是否支持实时频谱（Web 环境无 AudioContext 时为 false）
+   */
+  public hasAnalyser(): boolean {
+    return !!this.analyser && !!this.freqData;
+  }
+
+  /**
+   * 读取当前频谱数据（0-255）。无分析器时返回 null。
+   * 返回内部复用的 Uint8Array，调用方请勿长期持有。
+   */
+  public getFrequencyData(): Uint8Array | null {
+    if (!this.analyser || !this.freqData) return null;
+    this.analyser.getByteFrequencyData(this.freqData);
+    return this.freqData;
   }
 
   public setEQEnabled(enabled: boolean) {

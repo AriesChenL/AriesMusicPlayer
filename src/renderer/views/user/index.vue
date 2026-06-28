@@ -54,112 +54,175 @@
       </div>
     </template>
     <template v-else>
-      <div
-        v-if="userDetail && user"
-        class="left"
-        :class="setAnimationClass('animate__fadeIn')"
-        :style="{ backgroundImage: `url(${getImgUrl(user.backgroundUrl)})` }"
-      >
-        <div class="page">
-          <div class="user-name">
-            <span>{{ user.nickname }}</span>
-            <span v-if="currentLoginType" class="login-type">{{
-              t('login.title.' + currentLoginType)
-            }}</span>
-          </div>
-          <div class="user-info">
-            <n-avatar round :size="50" :src="getImgUrl(user.avatarUrl, '50y50')" />
-            <div class="user-info-list">
-              <div class="user-info-item">
-                <div class="label">{{ userDetail.profile.followeds }}</div>
-                <div>{{ t('user.profile.followers') }}</div>
-              </div>
-              <div class="user-info-item" @click="showFollowList">
-                <div class="label">{{ userDetail.profile.follows }}</div>
-                <div>{{ t('user.profile.following') }}</div>
-              </div>
-              <div class="user-info-item">
-                <div class="label">{{ userDetail.level }}</div>
-                <div>{{ t('user.profile.level') }}</div>
-              </div>
+      <div v-if="userDetail && user" class="user-content">
+        <!-- LEFT: 个人资料 + 标签 + 歌单 -->
+        <div class="left-col" :class="setAnimationClass('animate__fadeIn')">
+          <!-- 个人横幅 -->
+          <div class="profile-banner">
+            <div class="banner-strip" :style="bannerStyle">
+              <div class="banner-circle banner-circle-1"></div>
+              <div class="banner-circle banner-circle-2"></div>
             </div>
-          </div>
-          <div class="uesr-signature">{{ userDetail.profile.signature }}</div>
-          <div class="play-list" :class="setAnimationClass('animate__fadeIn')">
-            <div class="tab-container">
-              <n-tabs v-model:value="currentTab" type="segment" animated>
-                <n-tab v-for="tab in tabs" :key="tab.key" :name="tab.key" :tab="t(tab.label)">
-                </n-tab>
-              </n-tabs>
-            </div>
-            <n-scrollbar>
-              <div class="mt-4">
-                <div
-                  v-if="albumLoading && currentTab === 'album'"
-                  class="flex h-32 items-center justify-center"
-                >
-                  <n-spin size="medium" />
+            <div class="profile-main">
+              <div class="profile-avatar">
+                <img :src="getImgUrl(user.avatarUrl, '200y200')" alt="" />
+              </div>
+              <div class="profile-meta">
+                <div class="profile-name-row">
+                  <span class="profile-name">{{ user.nickname }}</span>
+                  <span class="profile-lv">Lv.{{ userDetail.level }}</span>
                 </div>
-                <template v-else>
-                  <button
-                    class="play-list-item"
-                    @click="goToImportPlaylist"
-                    v-if="isElectron && currentTab === 'created'"
-                  >
-                    <div class="play-list-item-img"><i class="icon iconfont ri-add-line"></i></div>
-                    <div class="play-list-item-info">
-                      <div class="play-list-item-name">
-                        {{ t('comp.playlist.import.button') }}
-                      </div>
+                <div class="profile-sign">{{ userDetail.profile.signature }}</div>
+              </div>
+              <div class="profile-actions">
+                <span v-if="currentLoginType" class="login-type-pill">
+                  {{ t('login.title.' + currentLoginType) }}
+                </span>
+              </div>
+            </div>
+            <div class="profile-stats">
+              <div class="stat-item">
+                <span class="stat-num">{{ userDetail.profile.followeds }}</span>
+                <span class="stat-label">{{ t('user.profile.followers') }}</span>
+              </div>
+              <div class="stat-div"></div>
+              <div class="stat-item" @click="showFollowList">
+                <span class="stat-num">{{ userDetail.profile.follows }}</span>
+                <span class="stat-label">{{ t('user.profile.following') }}</span>
+              </div>
+              <div class="stat-div"></div>
+              <div class="stat-item">
+                <span class="stat-num accent">{{ userDetail.level }}</span>
+                <span class="stat-label">{{ t('user.profile.level') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 分段标签 -->
+          <div class="seg-tabs">
+            <button
+              v-for="tab in tabs"
+              :key="tab.key"
+              class="seg-tab"
+              :style="tabStyle(tab.key)"
+              @click="currentTab = tab.key"
+            >
+              {{ t(tab.label) }}
+            </button>
+          </div>
+
+          <!-- 歌单列表 -->
+          <div class="pl-list">
+            <n-scrollbar>
+              <div
+                v-if="albumLoading && currentTab === 'album'"
+                class="flex h-32 items-center justify-center"
+              >
+                <n-spin size="medium" />
+              </div>
+              <div v-else class="pl-list-inner">
+                <button
+                  v-if="isElectron && currentTab === 'created'"
+                  class="pl-import"
+                  @click="goToImportPlaylist"
+                >
+                  <span class="pl-import-icon">
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                  </span>
+                  <span class="pl-import-text">{{ t('comp.playlist.import.button') }}</span>
+                </button>
+                <div
+                  v-for="(item, index) in currentList"
+                  :key="index"
+                  class="pl-item"
+                  @click="handleItemClick(item)"
+                >
+                  <n-image
+                    class="pl-thumb"
+                    :src="getImgUrl(getCoverUrl(item), '100y100')"
+                    lazy
+                    preview-disabled
+                  />
+                  <div class="pl-info">
+                    <div class="pl-name">
+                      <n-ellipsis :line-clamp="1">{{ item.name }}</n-ellipsis>
                     </div>
-                  </button>
-                  <div
-                    v-for="(item, index) in currentList"
-                    :key="index"
-                    class="play-list-item"
-                    @click="handleItemClick(item)"
-                  >
-                    <n-image
-                      :src="getImgUrl(getCoverUrl(item), '50y50')"
-                      class="play-list-item-img"
-                      lazy
-                      preview-disabled
-                    />
-                    <div class="play-list-item-info">
-                      <div class="play-list-item-name">
-                        <n-ellipsis :line-clamp="1">{{ item.name }}</n-ellipsis>
-                      </div>
-                      <div class="play-list-item-count">
-                        {{ getItemDescription(item) }}
-                      </div>
-                    </div>
+                    <div class="pl-count">{{ getItemDescription(item) }}</div>
                   </div>
-                  <div class="pb-20"></div>
-                  <play-bottom />
-                </template>
+                  <span v-if="currentTab === 'created' && item.specialType === 5" class="pl-badge">
+                    默认
+                  </span>
+                </div>
+                <play-bottom />
               </div>
             </n-scrollbar>
           </div>
         </div>
-      </div>
-      <div v-if="!isMobile" class="right" :class="setAnimationClass('animate__fadeIn')">
-        <div class="title">{{ t('user.ranking.title') }}</div>
-        <div class="record-list">
-          <n-scrollbar>
-            <div
-              v-for="(item, index) in recordList"
-              :key="item.id"
-              class="record-item"
-              :class="setAnimationClass('animate__bounceInUp')"
-              :style="setAnimationDelay(index, 25)"
-            >
-              <div class="play-score">
-                {{ index + 1 }}
+
+        <!-- RIGHT: 听歌排行 -->
+        <div v-if="!isMobile" class="right-col" :class="setAnimationClass('animate__fadeIn')">
+          <div class="rank-header">
+            <span class="rank-title">{{ t('user.ranking.title') }}</span>
+            <span class="rank-total">累计 {{ recordList.length }} 首</span>
+          </div>
+          <div class="rank-list">
+            <n-scrollbar>
+              <div class="rank-list-inner">
+                <div
+                  v-for="(item, index) in recordList"
+                  :key="item.id"
+                  class="rank-item"
+                  :class="setAnimationClass('animate__bounceInUp')"
+                  :style="setAnimationDelay(index, 25)"
+                >
+                  <span class="rank-num" :class="{ accent: index < 3 }">{{ index + 1 }}</span>
+                  <n-image
+                    class="rank-thumb"
+                    :src="getImgUrl(item.picUrl, '100y100')"
+                    lazy
+                    preview-disabled
+                  />
+                  <div class="rank-info">
+                    <div class="rank-name">{{ item.name }}</div>
+                    <div class="rank-artist">{{ recordArtist(item) }}</div>
+                  </div>
+                  <button class="rank-btn" @click.stop="handlePlay">
+                    <svg
+                      width="17"
+                      height="17"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M12 20.5S3 14.7 3 8.9C3 6 5.2 4 7.8 4c1.7 0 3.2.9 4.2 2.3C13 4.9 14.5 4 16.2 4 18.8 4 21 6 21 8.9c0 5.8-9 11.6-9 11.6z"
+                      />
+                    </svg>
+                  </button>
+                  <button class="rank-btn rank-btn-play" @click.stop="handlePlay">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5.5v13l11-6.5z" />
+                    </svg>
+                  </button>
+                </div>
+                <play-bottom />
               </div>
-              <song-item class="song-item" :item="item" mini @play="handlePlay" />
-            </div>
-            <play-bottom />
-          </n-scrollbar>
+            </n-scrollbar>
+          </div>
         </div>
       </div>
     </template>
@@ -184,7 +247,6 @@ import { useRouter } from 'vue-router';
 import { getUserAlbumSublist, getUserDetail, getUserPlaylist, getUserRecord } from '@/api/user';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import PlayBottom from '@/components/common/PlayBottom.vue';
-import SongItem from '@/components/common/SongItem.vue';
 import { usePlayerStore } from '@/store/modules/player';
 import { useUserStore } from '@/store/modules/user';
 import { getImgUrl, isElectron, isMobile, setAnimationClass, setAnimationDelay } from '@/utils';
@@ -252,6 +314,23 @@ const getItemDescription = (item: any) => {
     return `${t('user.playlist.trackCount', { count: item.trackCount })}，${t('user.playlist.playCount', { count: item.playCount })}`;
   }
 };
+
+// ===== 设计稿样式辅助 =====
+// 个人横幅：有背景图用图，否则用设计稿渐变
+const bannerStyle = computed(() => {
+  const url = user.value?.backgroundUrl ? getImgUrl(user.value.backgroundUrl, '800y300') : '';
+  return url
+    ? `background-image:url(${url});background-size:cover;background-position:center;`
+    : 'background:linear-gradient(120deg,var(--accent) 0%,var(--accent2) 48%,#2a4a6c 100%);';
+});
+// 分段标签激活/未激活配色
+const tabStyle = (key: string) =>
+  currentTab.value === key
+    ? 'background:var(--accent);color:var(--accentText);'
+    : 'background:transparent;color:var(--text2);';
+// 听歌排行的歌手名
+const recordArtist = (item: any) =>
+  ((item.ar || item.song?.ar || []) as any[]).map((a) => a.name).join(' / ');
 
 // 统一处理列表项点击
 const handleItemClick = (item: any) => {
@@ -464,145 +543,427 @@ const currentLoginType = computed(() => userStore.loginType);
 </script>
 
 <style lang="scss" scoped>
+/* ===== 1:1 还原设计稿「我的」页 ===== */
 .user-page {
   @apply flex h-full;
-  /* 与首页/排行等标准页保持一致的左右内边距（PC 端约 2rem） */
   padding-left: var(--page-pl);
   padding-right: var(--page-pr);
-  .left {
-    max-width: 600px;
-    @apply flex-1 rounded-2xl overflow-hidden relative bg-no-repeat h-full;
-    @apply bg-gray-900 dark:bg-gray-800;
+}
 
-    .page {
-      @apply p-4 w-full z-10 flex flex-col h-full;
-      @apply bg-black bg-opacity-40;
-    }
-    .title {
-      @apply text-lg font-bold flex items-center justify-between;
-      @apply text-gray-900 dark:text-white;
-    }
-    .user-name {
-      @apply text-xl font-bold mb-4 flex justify-between;
-      @apply text-white text-opacity-70;
-    }
+.user-content {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  gap: 20px;
+  padding-bottom: 18px;
+  width: 100%;
+}
 
-    .uesr-signature {
-      @apply mt-4;
-      @apply text-white text-opacity-70;
-    }
+/* ---- 左侧 ---- */
+.left-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
 
-    .user-info {
-      @apply flex items-center;
-      &-list {
-        @apply flex justify-around w-2/5 text-center;
-        @apply text-white text-opacity-70;
+.profile-banner {
+  position: relative;
+  border-radius: var(--rc);
+  overflow: hidden;
+  flex: none;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
 
-        .label {
-          @apply text-xl font-bold text-white;
-        }
-      }
+.banner-strip {
+  height: 96px;
+  position: relative;
+}
 
-      &-item {
-        @apply cursor-pointer;
-      }
-    }
+.banner-circle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.banner-circle-1 {
+  top: -30px;
+  right: 60px;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.banner-circle-2 {
+  bottom: -40px;
+  right: 160px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.profile-main {
+  padding: 0 24px 20px;
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  margin-top: -40px;
+  position: relative;
+}
+
+.profile-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 24px;
+  flex: none;
+  overflow: hidden;
+  background: linear-gradient(140deg, #79c6ff, #2f6488);
+  box-shadow:
+    0 8px 20px -6px rgba(0, 0, 0, 0.4),
+    0 0 0 4px var(--panel);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.profile-meta {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 2px;
+}
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.profile-name {
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--text);
+}
+.profile-lv {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--accentSoft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  flex: none;
+}
+.profile-sign {
+  font-size: 12.5px;
+  color: var(--text3);
+  margin-top: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 9px;
+  flex: none;
+  padding-bottom: 2px;
+}
+.login-type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--accentSoft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 8px;
+  padding: 0 24px 20px;
+}
+.stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+}
+.stat-num {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  &.accent {
+    color: var(--accent);
+  }
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text3);
+}
+.stat-div {
+  width: 1px;
+  background: var(--line2);
+  margin: 2px 14px;
+}
+
+/* 分段标签 */
+.seg-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 16px;
+  flex: none;
+  padding: 5px;
+  border-radius: 14px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  align-self: flex-start;
+}
+.seg-tab {
+  padding: 8px 26px;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+/* 歌单列表 */
+.pl-list {
+  flex: 1;
+  min-height: 0;
+  margin-top: 14px;
+}
+.pl-list-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pl-import {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 12px;
+  border-radius: var(--rb);
+  cursor: pointer;
+  border: 1px dashed var(--line2);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--accentLine);
+    background: var(--accentSoft);
+  }
+}
+.pl-import-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel2);
+  color: var(--accent);
+}
+.pl-import-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.pl-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 12px;
+  border-radius: var(--rb);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: var(--elev);
+  }
+}
+.pl-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex: none;
+  overflow: hidden;
+  :deep(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+.pl-info {
+  flex: 1;
+  min-width: 0;
+}
+.pl-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.pl-count {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 3px;
+}
+.pl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--accentSoft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  flex: none;
+}
+
+/* ---- 右侧：听歌排行 ---- */
+.right-col {
+  width: 420px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.rank-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex: none;
+  margin-bottom: 14px;
+}
+.rank-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+.rank-total {
+  font-size: 12px;
+  color: var(--text3);
+}
+.rank-list {
+  flex: 1;
+  min-height: 0;
+}
+.rank-list-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 9px 12px;
+  border-radius: var(--rb);
+  cursor: pointer;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--accentLine);
+  }
+}
+.rank-num {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text3);
+  width: 26px;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  &.accent {
+    color: var(--accent);
+  }
+}
+.rank-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  flex: none;
+  overflow: hidden;
+  :deep(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+.rank-info {
+  flex: 1;
+  min-width: 0;
+}
+.rank-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rank-artist {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rank-btn {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: var(--elev);
+    color: var(--accent);
   }
 
-  .right {
-    @apply flex-1 ml-4 overflow-hidden h-full;
+  &.rank-btn-play {
+    background: var(--accentSoft);
+    color: var(--accent);
 
-    .record-list {
-      @apply rounded-2xl;
-      @apply bg-light dark:bg-dark;
-      height: calc(100% - 60px);
-
-      .record-item {
-        @apply flex items-center px-2 mb-2 rounded-2xl bg-light-100 dark:bg-dark-100;
-      }
-
-      .song-item {
-        @apply flex-1;
-      }
-
-      .play-score {
-        @apply text-gray-500 dark:text-gray-400 mr-2 text-lg w-10 h-10 rounded-full flex items-center justify-center;
-      }
-    }
-
-    .title {
-      @apply text-xl font-bold m-4;
-      @apply text-gray-900 dark:text-white;
+    &:hover {
+      background: var(--accent);
+      color: var(--accentText);
     }
   }
 }
 
-.play-list {
-  @apply mt-4 py-4 px-2 rounded-xl flex-1 overflow-hidden;
-  @apply bg-light dark:bg-dark;
-
-  &-title {
-    @apply text-lg;
-    @apply text-gray-900 dark:text-white;
-  }
-
-  &-item {
-    @apply flex items-center px-2 py-2 rounded-xl cursor-pointer w-full;
-    @apply transition-all duration-200;
-    @apply hover:bg-light-200 dark:hover:bg-dark-200;
-
-    &-img {
-      @apply flex items-center justify-center rounded-xl text-[40px] w-[60px] h-[60px] bg-light-300 dark:bg-dark-300;
-      .iconfont {
-        @apply text-[40px];
-      }
-    }
-
-    &-info {
-      @apply ml-2 flex-1;
-    }
-
-    &-name {
-      @apply text-gray-900 dark:text-white text-base flex items-center gap-2;
-
-      .playlist-creator-tag {
-        @apply inline-flex items-center justify-center px-2 rounded-full text-xs;
-        @apply bg-light-300 text-primary dark:bg-dark-300 dark:text-white;
-        @apply border border-primary/20 dark:border-primary/30;
-        height: 18px;
-        font-size: 10px;
-        font-weight: 500;
-        min-width: 60px;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-      }
-    }
-
-    &-count {
-      @apply text-gray-500 dark:text-gray-400;
-    }
-  }
-}
-
-.login-type {
-  @apply text-sm text-primary-500 dark:text-primary-400;
-}
-
+/* 移动端 / 登录态 */
 .mobile {
   .user-page {
     padding-left: var(--page-pl);
     padding-right: var(--page-pr);
   }
-
   .login-container {
     @apply flex justify-center items-center h-full w-full;
-  }
-}
-
-:deep(.n-tabs-rail) {
-  @apply rounded-xl overflow-hidden !important;
-  .n-tabs-capsule {
-    @apply rounded-xl !important;
   }
 }
 </style>

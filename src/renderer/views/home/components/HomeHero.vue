@@ -557,8 +557,8 @@ const fetchHeroData = async () => {
     promises.push(
       getPersonalizedPlaylist(8)
         .then((res: any) => {
-          const list = res.result || res.data;
-          if (list && !isLoggedIn.value) hotPlaylists.value = list;
+          const list = res.data?.result || res.data?.data || [];
+          if (list.length && !isLoggedIn.value) hotPlaylists.value = list;
         })
         .catch(() => {})
     );

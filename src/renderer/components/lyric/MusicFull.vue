@@ -15,11 +15,15 @@
       class="background-layer"
       :style="backgroundImageStyle"
     ></div>
-    <div id="drawer-target" :class="[config.theme]" class="relative z-10">
+    <div id="drawer-target" :class="[config.theme]" class="relative z-10" :style="accentVars">
       <!-- 左侧关闭按钮 -->
       <div
-        class="control-left absolute top-8 left-8 z-[9999]"
-        :class="{ 'pure-mode': config.pureModeEnabled }"
+        class="control-left absolute z-[9999]"
+        :class="{
+          'pure-mode': config.pureModeEnabled,
+          'is-mac': isMac,
+          'is-blur': !isWindowFocused
+        }"
       >
         <div class="control-btn" @click="closeMusicFull">
           <i class="ri-arrow-down-s-line"></i>
@@ -28,8 +32,8 @@
 
       <!-- 右侧功能按钮组 -->
       <div
-        class="control-right absolute top-8 right-8 z-[9999]"
-        :class="{ 'pure-mode': config.pureModeEnabled }"
+        class="control-right absolute z-[9999]"
+        :class="{ 'pure-mode': config.pureModeEnabled, 'is-blur': !isWindowFocused }"
       >
         <n-popover trigger="click" placement="bottom" raw>
           <template #trigger>
@@ -183,6 +187,7 @@
 
 <script setup lang="ts">
 import { useDebounceFn } from '@vueuse/core';
+import tinycolor from 'tinycolor2';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -207,7 +212,7 @@ import { useLyricBackground } from '@/hooks/useLyricBackground';
 import { usePlayerStore } from '@/store/modules/player';
 import { useSettingsStore } from '@/store/modules/settings';
 import { DEFAULT_LYRIC_CONFIG, LyricConfig } from '@/types/lyric';
-import { getImgUrl, isMobile } from '@/utils';
+import { getImgUrl, isElectron, isMobile } from '@/utils';
 import { getTextColors } from '@/utils/linearColor';
 
 const { t } = useI18n();
@@ -407,7 +412,7 @@ watch(
 const { getLrcStyle: originalLrcStyle } = useLyricProgress();
 
 const getLrcStyle = (index: number) => {
-  const colors = { ...(textColors.value || getTextColors()), active: '#5ca9e3' };
+  const colors = { ...(textColors.value || getTextColors()), active: musicAccent.value };
   const originalStyle = originalLrcStyle(index);
 
   if (index === nowIndex.value) {
@@ -438,7 +443,7 @@ const getLrcStyle = (index: number) => {
 
 // 逐字歌词样式函数
 const getWordStyle = (lineIndex: number, _wordIndex: number, word: any) => {
-  const colors = { ...(textColors.value || getTextColors()), active: '#5ca9e3' };
+  const colors = { ...(textColors.value || getTextColors()), active: musicAccent.value };
   // 如果不是当前行，返回普通样式
   if (lineIndex !== nowIndex.value) {
     return {
@@ -541,6 +546,62 @@ const handleScroll = () => {
 };
 
 const playerStore = usePlayerStore();
+
+// macOS 下顶部按钮需与原生交通灯对齐、并避让其占位
+const isMac =
+  isElectron && (window as any).electron?.ipcRenderer?.sendSync?.('get-platform') === 'darwin';
+
+// 窗口失焦时，顶部按钮跟随交通灯一起变灰（但保持可见）
+const isWindowFocused = ref(true);
+const handleWinFocus = () => {
+  isWindowFocused.value = true;
+};
+const handleWinBlur = () => {
+  isWindowFocused.value = false;
+};
+onMounted(() => {
+  isWindowFocused.value = document.hasFocus();
+  window.addEventListener('focus', handleWinFocus);
+  window.addEventListener('blur', handleWinBlur);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener('focus', handleWinFocus);
+  window.removeEventListener('blur', handleWinBlur);
+});
+
+// 从封面提取的主色，作为本页所有强调色（标题/进度/播放键/按钮/歌词高亮）
+const FALLBACK_ACCENT = '#5ca9e3';
+const musicAccent = computed(() => {
+  const pc = (playerStore.playMusic as any)?.primaryColor as string | undefined;
+  if (!pc || !tinycolor(pc).isValid()) return FALLBACK_ACCENT;
+
+  const base = tinycolor(pc);
+  const hsl = base.toHsl();
+  // 近乎灰白（无可用色相）或过亮 → 无法作为强调色，回退可读默认色
+  if (hsl.s < 0.15 || base.getBrightness() > 225) return FALLBACK_ACCENT;
+
+  let c = base.saturate(8);
+  // 背景偏亮（textColors.theme === 'dark' 表示底色明亮、需深色文字）→ 压暗保证对比
+  const bgIsLight = textColors.value?.theme === 'dark';
+  if (bgIsLight) {
+    while (c.getBrightness() > 165) c = c.darken(6);
+  } else {
+    while (c.getBrightness() < 95) c = c.lighten(6);
+  }
+  return c.toHexString();
+});
+// 注入到歌词页根节点，覆盖局部 --accent 等变量，使所有引用处一并变为音乐色
+const accentVars = computed(() => {
+  const c = tinycolor(musicAccent.value);
+  return {
+    '--accent': musicAccent.value,
+    '--accent2': c.clone().lighten(12).toHexString(),
+    '--accentText': c.isLight() ? '#0c1320' : '#ffffff',
+    '--accentLine': c.clone().setAlpha(0.5).toRgbString(),
+    '--accentSoft': c.clone().setAlpha(0.16).toRgbString(),
+    '--text-color-active': musicAccent.value
+  };
+});
 
 const closeMusicFull = () => {
   // 退出全屏模式
@@ -755,6 +816,8 @@ defineExpose({
 
   .right-side {
     @apply flex flex-col justify-center h-full relative overflow-hidden;
+    /* 上下留白，降低歌词区高度，避让顶部按钮与底部 */
+    padding-block: 3.5rem;
 
     &.full-width {
       @apply col-span-2;
@@ -965,6 +1028,17 @@ defineExpose({
 
 .control-left,
 .control-right {
+  /* 与原生交通灯（y≈14，中心≈20）同一高度 */
+  top: 6px;
+  transition: opacity 0.2s ease;
+  /* 处于顶部标题栏拖拽区内，需声明 no-drag 才能点击 */
+  -webkit-app-region: no-drag;
+
+  /* 失焦时跟随交通灯一起变灰，但保持可见 */
+  &.is-blur {
+    opacity: 0.45;
+  }
+
   &.pure-mode {
     @apply pointer-events-auto;
 
@@ -984,17 +1058,28 @@ defineExpose({
   }
 }
 
+.control-left {
+  left: 32px;
+
+  /* macOS 让位给原生交通灯（约 14~66px） */
+  &.is-mac {
+    left: 84px;
+  }
+}
+
 .control-right {
   @apply flex items-center gap-2;
+  right: 32px;
 }
 
 .control-btn {
-  @apply w-9 h-9 flex items-center justify-center rounded cursor-pointer transition-all duration-300;
+  @apply w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-300;
   background: rgba(142, 142, 142, 0.192);
   backdrop-filter: blur(12px);
+  -webkit-app-region: no-drag;
 
   i {
-    @apply text-xl;
+    @apply text-lg;
     color: var(--text-color-active);
   }
 

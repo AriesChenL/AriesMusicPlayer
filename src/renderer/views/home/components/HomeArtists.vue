@@ -1,5 +1,5 @@
 <template>
-  <section class="artists-section">
+  <section class="artists-section relative">
     <!-- Loading Skeleton -->
     <div v-if="loading" class="artists-scroll flex gap-6 md:gap-8 overflow-x-hidden pb-4">
       <div v-for="i in 8" :key="i" class="flex flex-col items-center gap-3">
@@ -25,11 +25,11 @@
         >
           <!-- Artist Avatar -->
           <div
-            class="artist-avatar relative h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800 shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:shadow-2xl group-hover:shadow-primary/20"
+            class="artist-avatar relative h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800 shadow-lg transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/20"
           >
             <img
               :src="getImgUrl(item.picUrl, '300y300')"
-              class="h-full w-full object-cover grayscale-[0.15] transition-all duration-700 group-hover:grayscale-0 group-hover:brightness-110"
+              class="h-full w-full object-cover grayscale-[0.15] transition-all duration-700 group-hover:scale-110 group-hover:grayscale-0 group-hover:brightness-110"
               loading="lazy"
               :alt="item.name"
             />
@@ -47,25 +47,19 @@
           </span>
         </div>
       </div>
-
-      <!-- Scroll Indicators (Optional visual feedback) -->
-      <div
-        class="scroll-fade-left pointer-events-none absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r to-transparent opacity-0 transition-opacity"
-        style="
-          --tw-gradient-from: var(--win);
-          background-image: linear-gradient(to right, var(--win), transparent);
-        "
-        :class="{ 'opacity-100': showLeftFade }"
-      />
-      <div
-        class="scroll-fade-right pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l to-transparent opacity-0 transition-opacity"
-        style="
-          --tw-gradient-from: var(--win);
-          background-image: linear-gradient(to left, var(--win), transparent);
-        "
-        :class="{ 'opacity-100': showRightFade }"
-      />
     </div>
+
+    <!-- Scroll Indicators — 置于 section 上，固定在可视区左右两缘，不随内容滚动 -->
+    <div
+      class="scroll-fade-left pointer-events-none absolute left-0 top-0 bottom-0 w-12 opacity-0 transition-opacity"
+      style="background-image: linear-gradient(to right, var(--win), transparent)"
+      :class="{ 'opacity-100': showLeftFade }"
+    />
+    <div
+      class="scroll-fade-right pointer-events-none absolute right-0 top-0 bottom-0 w-12 opacity-0 transition-opacity"
+      style="background-image: linear-gradient(to left, var(--win), transparent)"
+      :class="{ 'opacity-100': showRightFade }"
+    />
   </section>
 </template>
 

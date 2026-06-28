@@ -18,6 +18,15 @@
           : '#000000'
     }"
   >
+    <!-- 背景电平动效：实时频谱驱动，无分析器时回退 CSS 动效；位于内容之下 -->
+    <div
+      ref="eqBgRef"
+      class="eq-bg"
+      :class="{ 'is-playing': play && !useRealSpectrum }"
+      aria-hidden="true"
+    >
+      <span v-for="i in eqBars" :key="i" class="eq-bar" :style="eqBarStyle(i)" />
+    </div>
     <div class="music-time custom-slider">
       <n-slider
         v-model:value="timeSlider"
@@ -156,7 +165,7 @@
 <script lang="ts" setup>
 import { useThrottleFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
-import { computed, ref, watch } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import MusicFullWrapper from '@/components/lyric/MusicFullWrapper.vue';
@@ -178,6 +187,115 @@ const { t } = useI18n();
 
 // 播放控制
 const { isPlaying: play, playMusicEvent, handleNext, handlePrev } = usePlaybackControl();
+
+// 背景电平动效：一排竖条
+const EQ_BAR_COUNT = 56;
+const eqBars = Array.from({ length: EQ_BAR_COUNT }, (_, i) => i);
+// CSS 回退动效的“伪随机”节奏（无实时频谱时使用）
+const eqBarStyle = (i: number) => {
+  const seed = Math.sin(i * 12.9898) * 43758.5453;
+  const rnd = seed - Math.floor(seed); // 0..1
+  const duration = 0.6 + rnd * 0.7; // 0.6 - 1.3s
+  const delay = -(rnd * 1.2); // 负延迟，使各条错峰起伏
+  return {
+    animationDuration: `${duration}s`,
+    animationDelay: `${delay}s`
+  };
+};
+
+// 实时频谱驱动（镜像对称 + 对数频率分布：低频居中、高频向两侧递减）
+const eqBgRef = ref<HTMLElement>();
+const useRealSpectrum = ref(false);
+const EQ_HALF = EQ_BAR_COUNT / 2; // 每侧条数
+let eqRafId = 0;
+let eqPeak = 0.2; // 自适应峰值（带衰减），用于动态归一化，放大整体起伏
+// 每个“频率档位”对应的 bin 区间（对数分布），按数据长度懒构建
+let eqBinRanges: Array<[number, number]> | null = null;
+
+const buildBinRanges = (bins: number): Array<[number, number]> => {
+  const minBin = 1;
+  const maxBin = Math.max(minBin + 1, Math.floor(bins * 0.85)); // 跳过几乎为零的最高频
+  const ranges: Array<[number, number]> = [];
+  for (let l = 0; l < EQ_HALF; l++) {
+    const b0 = Math.floor(minBin * Math.pow(maxBin / minBin, l / EQ_HALF));
+    const b1 = Math.max(b0 + 1, Math.floor(minBin * Math.pow(maxBin / minBin, (l + 1) / EQ_HALF)));
+    ranges.push([b0, Math.min(b1, bins)]);
+  }
+  return ranges;
+};
+
+const renderSpectrum = () => {
+  const data = audioService.getFrequencyData();
+  if (!data) {
+    // 无分析器（Web 环境）→ 回退 CSS 动效
+    useRealSpectrum.value = false;
+    eqRafId = 0;
+    return;
+  }
+  useRealSpectrum.value = true;
+
+  const els = eqBgRef.value?.children;
+  if (els && els.length) {
+    if (!eqBinRanges) eqBinRanges = buildBinRanges(data.length);
+
+    // 先算出每个档位的原始电平（档位 0 = 低频，EQ_HALF-1 = 高频）
+    const levels = new Array<number>(EQ_HALF);
+    let frameMax = 0;
+    for (let l = 0; l < EQ_HALF; l++) {
+      const [s, e] = eqBinRanges[l];
+      let sum = 0;
+      for (let k = s; k < e; k++) sum += data[k];
+      const v = sum / (e - s) / 255; // 0..1
+      levels[l] = v;
+      if (v > frameMax) frameMax = v;
+    }
+
+    // 自适应峰值：跟随当前最响，安静时缓慢衰减 → 整体始终满幅起伏
+    eqPeak = Math.max(frameMax, eqPeak * 0.92);
+    if (eqPeak < 0.08) eqPeak = 0.08; // 静音时设下限，避免放大噪声
+    const inv = 1 / eqPeak;
+
+    // 镜像映射到 56 根条：中间为低频，两侧为高频
+    for (let b = 0; b < els.length; b++) {
+      const level = b < EQ_HALF ? EQ_HALF - 1 - b : b - EQ_HALF;
+      let v = (levels[level] ?? 0) * inv; // 归一化到 0..1
+      v = Math.pow(Math.min(1, v), 0.6); // 抬升中低段，整体更饱满
+      const scale = 0.06 + v * 0.94;
+      (els[b] as HTMLElement).style.transform = `scaleY(${scale.toFixed(3)})`;
+    }
+  }
+  eqRafId = requestAnimationFrame(renderSpectrum);
+};
+
+const startSpectrum = () => {
+  if (eqRafId) return;
+  eqRafId = requestAnimationFrame(renderSpectrum);
+};
+
+const stopSpectrum = () => {
+  if (eqRafId) {
+    cancelAnimationFrame(eqRafId);
+    eqRafId = 0;
+  }
+  // 暂停时各条平滑落回低位（.eq-bar 有 transform 过渡）
+  const els = eqBgRef.value?.children;
+  if (els) {
+    for (let b = 0; b < els.length; b++) {
+      (els[b] as HTMLElement).style.transform = 'scaleY(0.1)';
+    }
+  }
+};
+
+watch(
+  play,
+  (isPlaying) => {
+    if (isPlaying) startSpectrum();
+    else stopSpectrum();
+  },
+  { immediate: true }
+);
+
+onUnmounted(stopSpectrum);
 
 // 音量控制
 const {
@@ -300,6 +418,39 @@ const openPlayListDrawer = () => {
   &.animate__slideOutDown {
     animation-duration: 0.3s !important;
     pointer-events: none;
+  }
+
+  /* 背景电平动效 */
+  .eq-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 0 14px;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0.4;
+    -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 90%);
+    mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 90%);
+
+    .eq-bar {
+      flex: 1 1 0;
+      height: 100%;
+      border-radius: 3px 3px 0 0;
+      background: linear-gradient(to top, var(--accent), var(--accent2));
+      transform-origin: bottom;
+      transform: scaleY(0.16);
+      transition: transform 0.08s linear;
+    }
+
+    &.is-playing .eq-bar {
+      animation-name: eqLevel;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+    }
   }
 
   .music-content {
@@ -622,6 +773,16 @@ const openPlayListDrawer = () => {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+/* 背景电平起伏 */
+@keyframes eqLevel {
+  0% {
+    transform: scaleY(0.12);
+  }
+  100% {
+    transform: scaleY(0.85);
   }
 }
 

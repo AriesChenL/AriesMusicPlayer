@@ -22,12 +22,8 @@
               <button
                 v-for="type in searchTypeOptions"
                 :key="type.key"
-                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap"
-                :class="
-                  searchType === type.key
-                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                    : 'bg-neutral-100 dark:bg-dark-100 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800'
-                "
+                class="search-chip px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap"
+                :class="{ 'is-active': searchType === type.key }"
                 @click="handleTypeChange(type.key)"
               >
                 {{ type.label }}
@@ -39,7 +35,8 @@
         <!-- Action Bar (Sticky) -->
         <section
           v-if="searchDetail?.songs?.length && searchType === SEARCH_TYPE.MUSIC"
-          class="action-bar sticky top-0 z-20 page-padding-x py-3 bg-white/80 dark:bg-dark/80 backdrop-blur-xl border-b border-neutral-100 dark:border-neutral-800/50"
+          class="action-bar sticky top-0 z-20 page-padding-x py-3 border-b border-neutral-100 dark:border-neutral-800/50"
+          style="background: var(--win)"
         >
           <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -60,7 +57,7 @@
 
               <button
                 v-if="!isSelecting && isElectron"
-                class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-dark-100 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center transition-all"
                 @click="startSelect"
               >
                 <i class="ri-checkbox-multiple-line text-lg" />
@@ -99,7 +96,7 @@
               <!-- Layout Toggle -->
               <button
                 v-if="!isMobile"
-                class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-dark-100 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center transition-all"
                 @click="toggleLayout"
               >
                 <i :class="isCompactLayout ? 'ri-list-check-2' : 'ri-grid-line'" class="text-lg" />
@@ -497,6 +494,34 @@ watch(
 <style lang="scss" scoped>
 .search-result-page {
   position: relative;
+}
+
+/* 标签配色与「发现」页保持一致 */
+.search-chip {
+  background: var(--chip);
+  color: var(--chipText);
+
+  &:hover {
+    background: var(--accentSoft);
+    color: var(--accent);
+  }
+
+  &.is-active {
+    background: var(--accent);
+    color: var(--accentText);
+    box-shadow: 0 6px 14px -5px var(--accentLine);
+  }
+}
+
+/* 工具栏图标按钮：与标签同套主题色 */
+.action-btn-icon {
+  background: var(--chip);
+  color: var(--chipText);
+
+  &:hover {
+    background: var(--accentSoft);
+    color: var(--accent);
+  }
 }
 
 .animate-item {

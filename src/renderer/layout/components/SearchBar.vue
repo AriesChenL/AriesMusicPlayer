@@ -20,7 +20,7 @@
         :show="showSuggestions"
         :show-arrow="false"
         style="margin-top: 6px"
-        content-style="padding:0;border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.12);"
+        content-style="padding:0;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);"
         raw
       >
         <template #trigger>
@@ -471,31 +471,30 @@ onMounted(() => {
   max-width: 9999px;
 }
 
+/* 复刻设计稿全局搜索框 */
 .search-inner {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 10px;
-  border-radius: 9999px;
-  border: 1.5px solid var(--line);
+  gap: 10px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
   background: var(--panel2);
   transition:
-    border-color 0.2s,
-    background 0.2s,
-    box-shadow 0.2s;
+    border-color 0.18s ease,
+    background 0.18s ease;
 }
+.search-inner:hover,
 .search-inner--focus {
   border-color: var(--accentLine);
-  background: var(--elev);
-  box-shadow: 0 0 0 3px var(--accentSoft);
 }
 
 .search-icon-glyph {
-  font-size: 14px;
-  color: #9ca3af;
+  font-size: 17px;
+  color: var(--text3);
   flex-shrink: 0;
-  transition: color 0.2s;
+  transition: color 0.18s ease;
 }
 .search-inner--focus .search-icon-glyph {
   color: var(--accent);
@@ -507,43 +506,26 @@ onMounted(() => {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 13px;
-  color: #111827;
-}
-.dark .search-input {
-  color: #f3f4f6;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
 }
 .search-input::placeholder {
-  color: #9ca3af;
+  color: var(--text3);
 }
 
 .type-chip {
   display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: #f3f4f6;
-  font-size: 11px;
-  font-weight: 500;
-  color: #6b7280;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text2);
   cursor: pointer;
   white-space: nowrap;
-  transition:
-    background 0.15s,
-    color 0.15s;
+  transition: color 0.15s ease;
   flex-shrink: 0;
 }
-.dark .type-chip {
-  background: #1f2937;
-  color: #9ca3af;
-}
 .type-chip:hover {
-  background: var(--accentSoft);
-  color: var(--accent);
-}
-.dark .type-chip:hover {
-  background: var(--accentSoft);
   color: var(--accent);
 }
 
@@ -755,40 +737,31 @@ onMounted(() => {
   color: #9ca3af;
 }
 
-/* ── Suggestions ─────────────────────────────────────── */
+/* ── Suggestions（对齐设计稿 token 体系）──────────────── */
 .suggestions-box {
-  background: #fff;
-}
-.dark .suggestions-box {
-  background: #111827;
+  background: var(--panel);
 }
 
 .suggest-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  font-size: 13px;
-  color: var(--line2);
+  gap: 10px;
+  padding: 9px 16px;
+  font-size: 14px;
+  color: var(--text2);
   cursor: pointer;
-  transition: background 0.1s;
-}
-.dark .suggest-row {
-  color: #d1d5db;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 .suggest-row:hover,
 .suggest-row--hi {
   background: var(--accentSoft);
   color: var(--accent);
 }
-.dark .suggest-row:hover,
-.dark .suggest-row--hi {
-  background: rgba(48, 127, 182, 0.12);
-  color: var(--accent);
-}
 .suggest-icon {
-  font-size: 13px;
-  color: #9ca3af;
+  font-size: 15px;
+  color: var(--text3);
   flex-shrink: 0;
 }
 .suggest-loading {

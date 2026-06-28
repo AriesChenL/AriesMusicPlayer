@@ -11,7 +11,11 @@
         <!-- Main Content Sections -->
         <div class="content-sections space-y-10 md:space-y-8 lg:space-y-12">
           <!-- Recommended Playlists (Grid Section) -->
-          <home-playlist-section :title="t('comp.recommendSonglist.title')" :limit="18" />
+          <home-playlist-section
+            :title="t('comp.recommendSonglist.title')"
+            :limit="18"
+            @more="router.push('/list')"
+          />
 
           <!-- Hot Artists (Horizontal Scroll Section) -->
           <home-artists :title="t('comp.recommendSinger.title')" :limit="15" />

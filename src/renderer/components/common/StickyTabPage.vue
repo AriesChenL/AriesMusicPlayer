@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full bg-white transition-colors duration-500 dark:bg-dark">
+  <div class="h-full w-full transition-colors duration-500" style="background: var(--win)">
     <n-scrollbar ref="scrollbarRef" class="h-full" :size="100" @scroll="handleScroll">
       <div class="w-full pb-32">
         <!-- Page Header (scrolls away) -->
@@ -24,6 +24,8 @@
             :categories="categories"
             :label-key="labelKey"
             :value-key="valueKey"
+            :collapsible="collapsible"
+            :compact="isSticky"
             @change="(val: any) => emit('change', val)"
           />
         </div>
@@ -52,10 +54,12 @@ withDefaults(
     categories: Category[];
     labelKey?: string;
     valueKey?: string;
+    collapsible?: boolean;
   }>(),
   {
     labelKey: 'label',
-    valueKey: 'value'
+    valueKey: 'value',
+    collapsible: false
   }
 );
 

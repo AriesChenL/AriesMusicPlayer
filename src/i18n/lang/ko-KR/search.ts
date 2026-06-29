@@ -20,6 +20,7 @@ export default {
   },
   search: {
     single: '단일곡',
+    artist: '가수',
     album: '앨범',
     playlist: '플레이리스트',
     mv: 'MV',

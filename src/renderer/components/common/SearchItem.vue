@@ -6,8 +6,11 @@
   >
     <!-- Image Container -->
     <div
-      class="relative overflow-hidden rounded-2xl shadow-sm transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-1"
-      :class="[item.type === 'mv' ? 'aspect-video' : 'aspect-square']"
+      class="relative overflow-hidden shadow-sm transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-1"
+      :class="[
+        item.type === 'mv' ? 'aspect-video' : 'aspect-square',
+        item.type === 'artist' ? 'rounded-full' : 'rounded-2xl'
+      ]"
     >
       <n-image
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -39,7 +42,7 @@
     </div>
 
     <!-- Info Section -->
-    <div class="mt-3 space-y-1 px-1">
+    <div class="mt-3 space-y-1 px-1" :class="{ 'text-center': item.type === 'artist' }">
       <h3
         class="line-clamp-1 text-sm font-bold text-neutral-800 transition-colors duration-200 group-hover:text-primary dark:text-neutral-200 dark:group-hover:text-white md:text-base"
       >
@@ -119,6 +122,11 @@ const handleClick = async () => {
     });
   } else if (props.item.type === 'mv') {
     handleShowMv();
+  } else if (props.item.type === 'artist') {
+    router.push({
+      name: 'artistDetail',
+      params: { id: props.item.id }
+    });
   } else if (props.item.type === 'djRadio') {
     playHistoryStore.addPodcastRadio({
       id: props.item.id,

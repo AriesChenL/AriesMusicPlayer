@@ -401,6 +401,13 @@ const loadSearch = async (isLoadMore = false) => {
       type: 'djRadio'
     }));
 
+    const artists = (data.result.artists || []).map((item: any) => ({
+      ...item,
+      picUrl: item.picUrl || item.img1v1Url,
+      desc: item.alias?.length ? item.alias.join(' / ') : t('search.search.artist'),
+      type: 'artist'
+    }));
+
     songs.forEach((item: any) => {
       item.picUrl = item.al.picUrl;
       item.artists = item.ar;
@@ -416,8 +423,9 @@ const loadSearch = async (isLoadMore = false) => {
       searchDetail.value.mvs = [...(searchDetail.value.mvs || []), ...mvs];
       searchDetail.value.playlists = [...(searchDetail.value.playlists || []), ...playlists];
       searchDetail.value.djRadios = [...(searchDetail.value.djRadios || []), ...djRadios];
+      searchDetail.value.artists = [...(searchDetail.value.artists || []), ...artists];
     } else {
-      searchDetail.value = { songs, albums, mvs, playlists, djRadios };
+      searchDetail.value = { songs, albums, mvs, playlists, djRadios, artists };
     }
 
     hasMore.value =
@@ -425,7 +433,8 @@ const loadSearch = async (isLoadMore = false) => {
       albums.length === ITEMS_PER_PAGE ||
       mvs.length === ITEMS_PER_PAGE ||
       playlists.length === ITEMS_PER_PAGE ||
-      djRadios.length === ITEMS_PER_PAGE;
+      djRadios.length === ITEMS_PER_PAGE ||
+      artists.length === ITEMS_PER_PAGE;
 
     page.value++;
   } catch (error) {

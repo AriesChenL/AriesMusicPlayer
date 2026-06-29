@@ -141,7 +141,10 @@ export const usePlaylistStore = defineStore(
         // 预加载下一首歌曲的音频和封面
         if (nextSong) {
           if (nextSong.playMusicUrl) {
-            preloadService.load(nextSong);
+            // 预加载失败无害（仅是提前抓取下一首），需吞掉 reject，避免冒泡成未捕获异常
+            preloadService.load(nextSong).catch((err) => {
+              console.warn('[Playlist] 预加载下一首失败:', err);
+            });
           }
           if (nextSong.picUrl) {
             preloadCoverImage(nextSong.picUrl, getImgUrl);

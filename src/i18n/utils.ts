@@ -1,40 +1,17 @@
-// 自动导入所有语言的所有翻译文件
-const allLangModules = import.meta.glob('./lang/**/*.ts', { eager: true });
+// 语言枚举/选项工具：仅依赖静态语言配置（languages.ts），
+// 不加载任何翻译消息内容，因此渲染语言下拉、托盘菜单等零成本。
+// 翻译消息按需加载见 ./lazyMessages.ts（渲染进程）/ ./main.ts（主进程全量）。
 
-// 构建语言消息对象
-export const buildLanguageMessages = () => {
-  const messages: Record<string, Record<string, any>> = {};
+import { LANGUAGE_DISPLAY_NAMES, LANGUAGE_PRIORITY } from './languages';
 
-  Object.entries(allLangModules).forEach(([path, module]) => {
-    // 解析路径，例如 './lang/zh-CN/common.ts' -> { lang: 'zh-CN', module: 'common' }
-    const match = path.match(/\.\/lang\/([^/]+)\/([^/]+)\.ts$/);
-    if (match) {
-      const [, langCode, moduleName] = match;
-
-      // 跳过 index 文件
-      if (moduleName !== 'index') {
-        if (!messages[langCode]) {
-          messages[langCode] = {};
-        }
-        messages[langCode][moduleName] = (module as any).default;
-      }
-    }
-  });
-
-  return messages;
-};
-
-// 获取所有支持的语言
+// 获取所有支持的语言（基于静态配置，无需加载消息）
 export const getSupportedLanguages = (): string[] => {
-  const messages = buildLanguageMessages();
-  return Object.keys(messages);
+  return Object.keys(LANGUAGE_DISPLAY_NAMES);
 };
 
 export const isLanguageSupported = (lang: string): boolean => {
   return getSupportedLanguages().includes(lang);
 };
-
-import { LANGUAGE_DISPLAY_NAMES, LANGUAGE_PRIORITY } from './languages';
 
 // 获取语言显示名称的映射
 export const getLanguageDisplayNames = (): Record<string, string> => {

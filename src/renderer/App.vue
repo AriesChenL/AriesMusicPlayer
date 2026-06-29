@@ -21,6 +21,7 @@ import { computed, nextTick, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import { setI18nLanguage } from '@/../i18n/renderer';
 import TrafficWarningDrawer from '@/components/TrafficWarningDrawer.vue';
 import { usePlayerStore } from '@/store/modules/player';
 import { usePlayerCoreStore } from '@/store/modules/playerCore';
@@ -88,7 +89,8 @@ watch(
   () => settingsStore.setData.language,
   (newLanguage) => {
     if (newLanguage && newLanguage !== locale.value) {
-      locale.value = newLanguage;
+      // 按需加载目标语言消息后再切换，避免短暂显示 key
+      setI18nLanguage(newLanguage);
     }
   },
   { immediate: true }
@@ -130,9 +132,8 @@ watch(
 );
 
 const handleSetLanguage = (value: string) => {
-  console.log('应用语言变更:', value);
   if (value) {
-    locale.value = value;
+    setI18nLanguage(value);
   }
 };
 

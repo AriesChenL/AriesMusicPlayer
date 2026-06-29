@@ -7,20 +7,46 @@ import '@/assets/fonts/remixicon.css';
 
 import { createApp } from 'vue';
 
-import i18n from '@/../i18n/renderer';
+import { DEFAULT_LANGUAGE, FALLBACK_LANGUAGE } from '@/../i18n/languages';
+import i18n, { ensureLanguageLoaded } from '@/../i18n/renderer';
 import router from '@/router';
 import pinia from '@/store';
+import { isElectron } from '@/utils';
 
 import App from './App.vue';
 import directives from './directive';
 
-const app = createApp(App);
+// 读取持久化语言（与 settings store 的来源保持一致），mount 前预加载，避免首屏语言闪烁
+function readPersistedLanguage(): string {
+  try {
+    const saved = isElectron
+      ? (window as any).electron?.ipcRenderer?.sendSync('get-store-value', 'set')
+      : JSON.parse(localStorage.getItem('appSettings') || '{}');
+    return saved?.language || DEFAULT_LANGUAGE;
+  } catch {
+    return DEFAULT_LANGUAGE;
+  }
+}
 
-Object.keys(directives).forEach((key: string) => {
-  app.directive(key, directives[key as keyof typeof directives]);
-});
+async function bootstrap() {
+  const startLang = readPersistedLanguage();
+  // 启动仅加载当前语言 + 回退语言（其余语言切换时按需加载）
+  await ensureLanguageLoaded(startLang);
+  if (FALLBACK_LANGUAGE !== startLang) {
+    await ensureLanguageLoaded(FALLBACK_LANGUAGE);
+  }
+  (i18n.global.locale as any).value = startLang;
 
-app.use(pinia);
-app.use(router);
-app.use(i18n as any);
-app.mount('#app');
+  const app = createApp(App);
+
+  Object.keys(directives).forEach((key: string) => {
+    app.directive(key, directives[key as keyof typeof directives]);
+  });
+
+  app.use(pinia);
+  app.use(router);
+  app.use(i18n as any);
+  app.mount('#app');
+}
+
+bootstrap();

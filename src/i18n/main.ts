@@ -1,8 +1,17 @@
 import { DEFAULT_LANGUAGE } from './languages';
-import { buildLanguageMessages } from './utils';
 
-// 使用工具函数构建语言消息对象
-const messages = buildLanguageMessages();
+// 主进程全量加载所有语言（Node 环境，体积不敏感；托盘菜单需即时切换）。
+// 渲染进程的按需加载见 ./lazyMessages.ts，两者刻意解耦避免 glob 互相污染。
+const allLangModules = import.meta.glob('./lang/**/*.ts', { eager: true });
+const messages: Record<string, Record<string, any>> = {};
+Object.entries(allLangModules).forEach(([path, module]) => {
+  const match = path.match(/\.\/lang\/([^/]+)\/([^/]+)\.ts$/);
+  if (match && match[2] !== 'index') {
+    const [, langCode, moduleName] = match;
+    if (!messages[langCode]) messages[langCode] = {};
+    messages[langCode][moduleName] = (module as any).default;
+  }
+});
 
 type Language = keyof typeof messages;
 
